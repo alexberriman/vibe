@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a collection of Node.js CLI tools to enhance my coding workflow.
+This is a Node fullstack project with automated testing and quality checks.
 
 ## Code Style Conventions
 
@@ -16,17 +16,16 @@ This is a collection of Node.js CLI tools to enhance my coding workflow.
 - **Trailing Commas**: Use trailing commas
 - **Semicolons**: Use semicolons
 
-### Command Structure
+### Component Structure
 
-Commands should be organized in directories with an index.ts file.
+Components should be organized in directories with an index.ts file.
 Example:
 ```
-commands/
-  example-command/
-    index.ts                # Exports the command
-    example-command.ts      # Command implementation
-    README.md               # Command documentation
-    example-command.test.ts # Tests (adjacent to implementation)
+components/
+  button/
+    index.ts       # Exports the component
+    button.tsx     # Component implementation
+    button.test.tsx    # Tests (adjacent to implementation)
 ```
 
 ### Test Files
@@ -37,30 +36,71 @@ Test files should follow the pattern: `{name}.test.ts`
 
 Use the following technologies in this project:
 
-### CLI
+### Frontend
 
-- **Language**: TypeScript
-- **Framework**: Commander.js
-- **Error Handling**: Functional approach
+- **Framework**: React v19
+- **Styling**: Tailwind v4
+- **Data Fetching**: React-query
+- **Documentation**: Storybook
 
 ### Code Organization & Architecture
 
-- **Command Design**: Maximize reusability
-  - Create small, composable, reusable functions
-  - Extract common patterns into shared utilities
-  - Build a command hierarchy that promotes reuse
-- **Command Documentation**: Every command must have a README.md
-  - Documentation should cover usage, options, and examples
-  - Include proper documentation of input/output
-- **Utility Organization**: One utility per file
-  - Each utility function should have its own dedicated file or be grouped logically
-  - Organize utilities by purpose/function
+- **Component Design**: Maximize reusability
+  - Create small, composable, reusable components
+  - Extract common patterns into shared components
+  - Build a component hierarchy that promotes reuse
+- **Component Documentation**: Every presentational component must have a Storybook story
+  - Stories should cover all component states and variants
+  - Include proper documentation of props and usage
+- **Hooks Organization**: One hook per file
+  - Each custom hook should have its own dedicated file
+  - Organize hooks by feature/entity
+  - Create separate hooks for each API operation (e.g., useCreateUser, useDeleteUser)
+- **Data Fetching Pattern**: 
+  - Create custom React Query hooks for each API endpoint
+  - Organize queries by entity/resource
+  - Leverage QueryClient for caching and background updates
+
+### UI Design Philosophy (2025)
+
+All UI components and interfaces should be CUTTING-EDGE, MODERN, and SEXY:
+
+- **Visual Design**: Create interfaces that look like they're from 2025
+  - Ultra-clean layouts with purposeful whitespace
+  - Neumorphic or glassmorphic elements that add depth and dimension
+  - Subtle shadows, gradients, and light effects
+  - Floating elements and layered UI components
+
+- **Interactions**: Design intuitive, fluid experiences
+  - Micro-animations for state changes and transitions
+  - Minimal friction in user workflows
+  - Context-aware interfaces that anticipate user needs
+
+- **Styling Approach**: Use Tailwind to create UNIQUE designs
+  - Push creative boundaries with modern aesthetics
+  - Utilize advanced color theory and typography
+  - Aim for visually IMPRESSIVE and DISTINCTIVE interfaces
+
+
+### Backend
+
+- **Framework**: Express v5
+
+### Utilities
+
+- **Logging**: Pino
+  - Configuration:
+    - Log level: info
+    - Pretty print: Enabled
+    - Transport: pino-pretty
+  - Do not use console.log - use appropriate log levels
 
 ### Testing
 
 - **Unit Testing**: Vitest
   - Leveraging Vite for fast test execution
   - Do NOT use Jest configuration or dependencies
+- **Component Testing**: Testing-library
 - **Test Location**: Tests should be placed adjacent to implementation files
   - Do NOT use __tests__ directories
 
@@ -69,9 +109,14 @@ Use the following technologies in this project:
 - **Bundler**: Tsup
 - **CI/CD**: github-actions
 
+**All presentational ("dumb") components should have a corresponding Storybook story file.**
+
+
+
 ## Project Architecture
 
-Follow a clear separation of concerns between CLI commands. Use well-defined interfaces for communication.
+Follow a clear separation of concerns between frontend and backend. Use well-defined interfaces to communicate between layers.
+
 
 ## CLI Architecture
 
@@ -81,6 +126,7 @@ This CLI tool follows these architectural principles:
 - **TypeScript**: Strong typing throughout the codebase
 - **Modular Design**: Separate concerns into focused modules
 - **Pure Functions**: Maximize testability with pure functions
+
 
 ## Module Structure
 
@@ -110,6 +156,7 @@ src/
     defaults.ts
 ```
 
+
 ## Error Handling Guidelines
 
 When implementing error handling:
@@ -119,3 +166,5 @@ When implementing error handling:
 - Exit with appropriate exit codes (0 for success, 1 for errors)
 - Use console.error for error output
 - Use console.log for success output
+
+

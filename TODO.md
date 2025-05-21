@@ -10,8 +10,8 @@ Create a CLI tool that scans a directory for Storybook stories and generates a J
 
 ### Core Functionality
 
-[ ] Set up the command structure (`commands/storybook-urls/`)
-[ ] Implement basic CLI argument handling using Commander.js
+[✅] Set up the command structure (`commands/storybook-urls/`)
+[✅] Implement basic CLI argument handling using Commander.js
 [ ] Create directory scanning utility that respects .gitignore patterns
 [ ] Develop Storybook configuration detector to find .storybook directory or config files
 [ ] Build file extension filter to identify story files (.stories.tsx, .stories.ts, .stories.jsx, .stories.js, etc.)
