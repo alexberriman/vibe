@@ -2,6 +2,10 @@ import { Command } from "commander";
 import fs from "node:fs/promises";
 import { createLogger } from "../../utils/logger.js";
 import { scanDirectory } from "../../utils/directory-scanner.js";
+import {
+  detectNextjsStructure,
+  type NextjsStructure,
+} from "../../utils/nextjs-structure-detector.js";
 
 type NextjsRoutesOptions = {
   readonly path?: string;
@@ -30,8 +34,28 @@ function getNextjsFileExtensions(): string[] {
 /**
  * Scan a directory for Next.js routes
  */
-async function scanNextjsProject(dirPath: string, logger = createLogger()): Promise<string[]> {
+async function scanNextjsProject(
+  dirPath: string,
+  logger = createLogger()
+): Promise<{ files: string[]; structure: NextjsStructure }> {
   logger.info(`Scanning Next.js project directory: ${dirPath}`);
+
+  // Detect Next.js project structure (app router and/or pages router)
+  const structure = await detectNextjsStructure({
+    basePath: dirPath,
+    logger,
+  });
+
+  // Log structure detection results
+  if (structure.hasAppRouter && structure.hasPagesRouter) {
+    logger.info("Detected both App Router and Pages Router in the project");
+  } else if (structure.hasAppRouter) {
+    logger.info("Detected App Router in the project");
+  } else if (structure.hasPagesRouter) {
+    logger.info("Detected Pages Router in the project");
+  } else {
+    logger.warn("Could not detect Next.js router structure in the project");
+  }
 
   const extensions = getNextjsFileExtensions();
   logger.info(`Looking for files with extensions: ${extensions.join(", ")}`);
@@ -43,7 +67,7 @@ async function scanNextjsProject(dirPath: string, logger = createLogger()): Prom
   });
 
   logger.info(`Found ${files.length} files matching extensions`);
-  return files;
+  return { files, structure };
 }
 
 /**
@@ -67,18 +91,23 @@ export function nextjsRoutesCommand(): Command {
       try {
         const dirPath = options.path || ".";
 
-        // Scan the Next.js project directory
-        const files = await scanNextjsProject(dirPath, logger);
+        // Scan the Next.js project directory and detect structure
+        const { files, structure } = await scanNextjsProject(dirPath, logger);
 
-        // TODO: Implement Next.js project structure detection (app router vs pages router)
-        // TODO: Implement route parsing logic
+        // TODO: Implement route parsing logic based on detected structure
 
-        // Placeholder result while implementation is in progress
+        // Enhanced result including structure detection
         const result = {
           info: "Next.js routes analysis in development",
           scannedDirectory: dirPath,
           port: options.port || 3000,
           filesFound: files.length,
+          structure: {
+            hasAppRouter: structure.hasAppRouter,
+            hasPagesRouter: structure.hasPagesRouter,
+            appDirectory: structure.appDirectory || null,
+            pagesDirectory: structure.pagesDirectory || null,
+          },
         };
 
         // Format the output

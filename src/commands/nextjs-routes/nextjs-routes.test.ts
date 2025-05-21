@@ -24,6 +24,15 @@ vi.mock("../../utils/directory-scanner.js", () => ({
   scanDirectory: vi.fn().mockResolvedValue([]),
 }));
 
+vi.mock("../../utils/nextjs-structure-detector.js", () => ({
+  detectNextjsStructure: vi.fn().mockResolvedValue({
+    hasAppRouter: true,
+    hasPagesRouter: true,
+    appDirectory: "/test/app",
+    pagesDirectory: "/test/pages",
+  }),
+}));
+
 describe("nextjsRoutesCommand", () => {
   beforeEach(() => {
     vi.clearAllMocks();

@@ -90,7 +90,7 @@ Create a CLI tool that analyzes a Next.js app directory and generates a JSON arr
 [✅] Set up the command structure (`commands/nextjs-routes/`)
 [✅] Implement basic CLI argument handling using Commander.js
 [✅] Create directory scanning utility that respects .gitignore patterns
-[ ] Implement Next.js project structure detection (identify app router and/or pages router)
+[✅] Implement Next.js project structure detection (identify app router and/or pages router)
 [ ] Develop Next.js configuration detector to find port settings (default: 3000)
 [ ] Build file system analyzer for app router directory structure
 [ ] Create file system analyzer for pages router directory structure
