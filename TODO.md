@@ -23,8 +23,8 @@ Create a CLI tool that scans a directory for Storybook stories and generates a J
 [✅] Implement pretty-print option for formatted output
 [✅] Add filtering options (by component type, file path, etc.)
 [✅] Create progress indicator for large codebases
-[ ] Add option to save output to file (default: print to console)
-[ ] Create detailed command README.md with usage examples
+[✅] Add option to save output to file (default: print to console)
+[✅] Create detailed command README.md with usage examples
 
 ---
 
