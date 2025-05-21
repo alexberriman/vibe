@@ -72,7 +72,7 @@ Create a CLI tool that analyzes a React app directory and generates a JSON array
 [✅] Handle nested route extraction and path building
 [✅] Create system for handling dynamic route parameters (e.g., `/users/:id`)
 [✅] Develop base URL construction with correct protocol, host, and port
-[ ] Build modular router detection system for future expansions
+[✅] Build modular router detection system for future expansions
 [✅] Build JSON output formatter
 [✅] Implement pretty-print option for formatted output
 [✅] Add option to save output to file (default: print to console)
