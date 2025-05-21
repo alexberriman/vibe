@@ -34,24 +34,24 @@ Create a CLI tool that spins up a server (e.g., Storybook, dev server), waits fo
 
 ### Core Functionality
 
-[ ] Set up the command structure (`commands/server-run/`)
-[ ] Implement basic CLI argument handling using Commander.js
+[✅] Set up the command structure (`commands/server-run/`)
+[✅] Implement basic CLI argument handling using Commander.js
 [ ] Create server launcher with configurable start command
 [ ] Implement URL/port availability detection
 [ ] Add polling mechanism to wait for server readiness
 [ ] Create command runner to execute tasks against running server
 [ ] Implement server teardown process
-[ ] Add timeout configuration and handling
-[ ] Implement proper process signal handling (SIGINT, SIGTERM)
+[✅] Add timeout configuration and handling
+[✅] Implement proper process signal handling (SIGINT, SIGTERM)
 [ ] Add error handling for server startup failures
 [ ] Implement server output parsing to detect error patterns
 [ ] Add detection for stalled processes that show no progress
 [ ] Create smart timeout system that differentiates between "still starting" and "error state"
 [ ] Implement error capture and formatting for detailed reporting
-[ ] Create support for environment variable passing
-[ ] Add logging with different verbosity levels
-[ ] Add option to keep server running after command completion
-[ ] Create detailed command README.md with usage examples
+[✅] Create support for environment variable passing
+[✅] Add logging with different verbosity levels
+[✅] Add option to keep server running after command completion
+[✅] Create detailed command README.md with usage examples
 
 ---
 
