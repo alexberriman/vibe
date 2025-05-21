@@ -87,9 +87,9 @@ Create a CLI tool that analyzes a Next.js app directory and generates a JSON arr
 
 ### Core Functionality
 
-[ ] Set up the command structure (`commands/nextjs-routes/`)
-[ ] Implement basic CLI argument handling using Commander.js
-[ ] Create directory scanning utility that respects .gitignore patterns
+[✅] Set up the command structure (`commands/nextjs-routes/`)
+[✅] Implement basic CLI argument handling using Commander.js
+[✅] Create directory scanning utility that respects .gitignore patterns
 [ ] Implement Next.js project structure detection (identify app router and/or pages router)
 [ ] Develop Next.js configuration detector to find port settings (default: 3000)
 [ ] Build file system analyzer for app router directory structure
@@ -107,7 +107,7 @@ Create a CLI tool that analyzes a Next.js app directory and generates a JSON arr
 [ ] Implement pretty-print option for formatted output
 [ ] Add option to save output to file (default: print to console)
 [ ] Add options to filter routes by pattern or type (page routes, API routes)
-[ ] Create detailed command README.md with usage examples
+[✅] Create detailed command README.md with usage examples
 
 ---
 

@@ -4,6 +4,7 @@ import { Command } from "commander";
 import { storybookUrlsCommand } from "./commands/storybook-urls/index.js";
 import { serverRunCommand } from "./commands/server-run/index.js";
 import { reactRoutesCommand } from "./commands/react-routes/index.js";
+import { nextjsRoutesCommand } from "./commands/nextjs-routes/index.js";
 
 // Create the main CLI program
 const program = new Command();
@@ -19,6 +20,7 @@ program
 program.addCommand(storybookUrlsCommand());
 program.addCommand(serverRunCommand());
 program.addCommand(reactRoutesCommand());
+program.addCommand(nextjsRoutesCommand());
 
 // Parse arguments and execute the matching command
 program.parse(process.argv);

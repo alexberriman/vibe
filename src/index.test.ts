@@ -33,6 +33,10 @@ vi.mock("./commands/react-routes/index.js", () => ({
   reactRoutesCommand: vi.fn().mockReturnValue("mocked-react-routes-command"),
 }));
 
+vi.mock("./commands/nextjs-routes/index.js", () => ({
+  nextjsRoutesCommand: vi.fn().mockReturnValue("mocked-nextjs-routes-command"),
+}));
+
 describe("CLI", () => {
   it("should initialize correctly", async () => {
     // Reset process.argv for the test
@@ -61,6 +65,7 @@ describe("CLI", () => {
     expect(mockCommandInstance.addCommand).toHaveBeenCalledWith("mocked-storybook-urls-command");
     expect(mockCommandInstance.addCommand).toHaveBeenCalledWith("mocked-server-run-command");
     expect(mockCommandInstance.addCommand).toHaveBeenCalledWith("mocked-react-routes-command");
+    expect(mockCommandInstance.addCommand).toHaveBeenCalledWith("mocked-nextjs-routes-command");
 
     // Verify that parse was called with process.argv
     expect(mockCommandInstance.parse).toHaveBeenCalledWith(process.argv);
