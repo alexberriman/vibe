@@ -10,6 +10,7 @@ import {
 import {
   parseJSXRoutes,
   parseObjectRoutes,
+  parseDataRouterRoutes,
   type RouteInfo,
 } from "../../utils/route-parsers/index.js";
 
@@ -124,8 +125,12 @@ async function extractRoutes(
         const routes = await parseObjectRoutes(file.filePath, { logger });
         allRoutes.push(...routes);
         logger.info(`Extracted ${routes.length} routes from ${file.filePath}`);
+      } else if (file.routerType === "data-router") {
+        // Parse data router API routes
+        const routes = await parseDataRouterRoutes(file.filePath, { logger });
+        allRoutes.push(...routes);
+        logger.info(`Extracted ${routes.length} routes from ${file.filePath}`);
       }
-      // Data router API will be implemented in subsequent tasks
     } catch (error) {
       logger.error(`Failed to extract routes from ${file.filePath}`);
       if (error instanceof Error) {
