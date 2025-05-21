@@ -7,6 +7,10 @@ import {
 } from "../../utils/nextjs-structure-detector.js";
 import { detectNextjsConfig } from "../../utils/nextjs-config-detector.js";
 import { analyzeAppRouter, type NextjsAppRoute } from "../../utils/nextjs-app-router-analyzer.js";
+import {
+  analyzePagesRouter,
+  type NextjsPagesRoute,
+} from "../../utils/nextjs-pages-router-analyzer.js";
 
 type NextjsRoutesOptions = {
   readonly path?: string;
@@ -48,6 +52,28 @@ function convertAppRouteToRouteInfo(appRoute: NextjsAppRoute, baseUrl: string): 
 }
 
 /**
+ * Convert a pages router route to a route info object
+ */
+function convertPagesRouteToRouteInfo(
+  pagesRoute: NextjsPagesRoute,
+  baseUrl: string
+): NextjsRouteInfo {
+  // Determine the route type
+  const routeType = pagesRoute.isApiRoute ? "api" : "page";
+
+  // Build the full URL
+  const url = `${baseUrl}${pagesRoute.routePath}`;
+
+  return {
+    path: pagesRoute.routePath,
+    url,
+    type: routeType,
+    hasDynamicSegments: pagesRoute.isDynamic,
+    source: "pages",
+  };
+}
+
+/**
  * Filter routes based on options
  */
 function filterRoutes(
@@ -76,7 +102,12 @@ function filterRoutes(
 async function scanNextjsProject(
   dirPath: string,
   logger = createLogger()
-): Promise<{ structure: NextjsStructure; port: number; appRoutes: NextjsAppRoute[] }> {
+): Promise<{
+  structure: NextjsStructure;
+  port: number;
+  appRoutes: NextjsAppRoute[];
+  pagesRoutes: NextjsPagesRoute[];
+}> {
   logger.info(`Scanning Next.js project directory: ${dirPath}`);
 
   // Detect Next.js project structure (app router and/or pages router)
@@ -108,8 +139,9 @@ async function scanNextjsProject(
     logger.info(`Using default Next.js port: ${configResult.port}`);
   }
 
-  // Initialize app routes array
+  // Initialize routes arrays
   let appRoutes: NextjsAppRoute[] = [];
+  let pagesRoutes: NextjsPagesRoute[] = [];
 
   // If app router is detected, analyze it
   if (structure.hasAppRouter && structure.appDirectory) {
@@ -121,7 +153,17 @@ async function scanNextjsProject(
     logger.info(`Found ${appRoutes.length} routes in App Router`);
   }
 
-  return { structure, port: configResult.port, appRoutes };
+  // If pages router is detected, analyze it
+  if (structure.hasPagesRouter && structure.pagesDirectory) {
+    logger.info(`Analyzing Pages Router directory: ${structure.pagesDirectory}`);
+    pagesRoutes = await analyzePagesRouter({
+      pagesDirectory: structure.pagesDirectory,
+      logger,
+    });
+    logger.info(`Found ${pagesRoutes.length} routes in Pages Router`);
+  }
+
+  return { structure, port: configResult.port, appRoutes, pagesRoutes };
 }
 
 /**
@@ -146,7 +188,10 @@ export function nextjsRoutesCommand(): Command {
         const dirPath = options.path || ".";
 
         // Scan the Next.js project directory and detect structure and configuration
-        const { structure, port, appRoutes } = await scanNextjsProject(dirPath, logger);
+        const { structure, port, appRoutes, pagesRoutes } = await scanNextjsProject(
+          dirPath,
+          logger
+        );
 
         // Use the detected port, unless overridden by command line option
         const resultPort = options.port ? Number(options.port) : port;
@@ -155,9 +200,15 @@ export function nextjsRoutesCommand(): Command {
         const baseUrl = `http://localhost:${resultPort}`;
 
         // Convert app routes to route info objects
-        const routes: NextjsRouteInfo[] = appRoutes.map((route) =>
-          convertAppRouteToRouteInfo(route, baseUrl)
+        const appRouteInfos = appRoutes.map((route) => convertAppRouteToRouteInfo(route, baseUrl));
+
+        // Convert pages routes to route info objects
+        const pagesRouteInfos = pagesRoutes.map((route) =>
+          convertPagesRouteToRouteInfo(route, baseUrl)
         );
+
+        // Combine all routes
+        const routes: NextjsRouteInfo[] = [...appRouteInfos, ...pagesRouteInfos];
 
         // Filter routes based on options
         const filteredRoutes = filterRoutes(routes, {
