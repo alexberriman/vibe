@@ -112,40 +112,70 @@ async function detectStorybookPort(configDir: string, logger: Logger): Promise<n
   ];
 
   for (const configFile of portConfigFiles) {
-    try {
-      const content = await fs.readFile(configFile, "utf8");
-
-      // Look for port configurations in the content
-      // This is a very basic regex pattern that would need to be improved for more complex cases
-      const portMatch = content.match(/port\s*:\s*(\d+)/);
-      if (portMatch && portMatch[1]) {
-        const port = Number(portMatch[1]);
-        logger.debug(`Detected Storybook port ${port} in ${configFile}`);
-        return port;
-      }
-
-      // Alternative pattern that might be used in some configs
-      const serverPortMatch = content.match(/server\s*:\s*{\s*port\s*:\s*(\d+)/);
-      if (serverPortMatch && serverPortMatch[1]) {
-        const port = Number(serverPortMatch[1]);
-        logger.debug(`Detected Storybook port ${port} in ${configFile}`);
-        return port;
-      }
-    } catch (error) {
-      // File doesn't exist or can't be read, continue to the next file
-      if (error instanceof Error && "code" in error && error.code === "ENOENT") {
-        logger.debug(`Configuration file not found: ${configFile}`);
-        continue;
-      }
-
-      // For other errors, log and continue
-      logger.warn(
-        `Error reading ${configFile}: ${error instanceof Error ? error.message : String(error)}`
-      );
+    const port = await tryReadPortFromFile(configFile, logger);
+    if (port) {
+      return port;
     }
   }
 
   // No port found in config files
   logger.debug("No Storybook port configuration found");
   return undefined;
+}
+
+/**
+ * Extract port number from a configuration file
+ */
+async function tryReadPortFromFile(
+  configFile: string,
+  logger: Logger
+): Promise<number | undefined> {
+  try {
+    const content = await fs.readFile(configFile, "utf8");
+    const port = extractPortFromContent(content);
+
+    if (port) {
+      logger.debug(`Detected Storybook port ${port} in ${configFile}`);
+      return port;
+    }
+  } catch (error) {
+    handleFileReadError(error, configFile, logger);
+  }
+
+  return undefined;
+}
+
+/**
+ * Extract port from file content using regex patterns
+ */
+function extractPortFromContent(content: string): number | undefined {
+  // Direct port configuration
+  const portMatch = content.match(/port\s*:\s*(\d+)/);
+  if (portMatch && portMatch[1]) {
+    return Number(portMatch[1]);
+  }
+
+  // Port inside server configuration
+  const serverPortMatch = content.match(/server\s*:\s*{\s*port\s*:\s*(\d+)/);
+  if (serverPortMatch && serverPortMatch[1]) {
+    return Number(serverPortMatch[1]);
+  }
+
+  return undefined;
+}
+
+/**
+ * Handle errors from file reading operations
+ */
+function handleFileReadError(error: unknown, configFile: string, logger: Logger): void {
+  // File doesn't exist or can't be read
+  if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+    logger.debug(`Configuration file not found: ${configFile}`);
+    return;
+  }
+
+  // For other errors, log and continue
+  logger.warn(
+    `Error reading ${configFile}: ${error instanceof Error ? error.message : String(error)}`
+  );
 }

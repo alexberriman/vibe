@@ -5,15 +5,12 @@ import { createStoryParser, parseStoryFiles } from "./index.js";
 import { TypeScriptStoryParser } from "./typescript-parser.js";
 import { JavaScriptStoryParser } from "./javascript-parser.js";
 
-// Mock dependencies
-vi.mock("node:fs/promises", () => ({
-  readFile: vi.fn(),
-}));
-
 describe("Story Parser Factory", () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    vi.mocked(fs.readFile).mockResolvedValue("export default {}; export const Primary = () => {};");
+    vi.spyOn(fs, "readFile").mockResolvedValue(
+      "export default {}; export const Primary = () => {};"
+    );
   });
 
   describe("createStoryParser", () => {
@@ -69,7 +66,7 @@ describe("Story Parser Factory", () => {
   describe("parseStoryFiles", () => {
     it("should parse multiple story files and combine results", async () => {
       // Mock different file contents for different files
-      vi.mocked(fs.readFile).mockImplementation((filePath) => {
+      vi.spyOn(fs, "readFile").mockImplementation((filePath) => {
         if (String(filePath).includes("Button.stories.tsx")) {
           return Promise.resolve(`
             export default { title: "Components/Button" };
@@ -113,7 +110,7 @@ describe("Story Parser Factory", () => {
 
     it("should continue parsing other files if one file fails", async () => {
       // Mock success for one file and error for another
-      vi.mocked(fs.readFile).mockImplementation((filePath) => {
+      vi.spyOn(fs, "readFile").mockImplementation((filePath) => {
         if (String(filePath).includes("Button.stories.tsx")) {
           return Promise.resolve(`
             export default { title: "Components/Button" };

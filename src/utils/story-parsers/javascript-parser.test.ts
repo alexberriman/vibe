@@ -2,11 +2,6 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import fs from "node:fs/promises";
 import { JavaScriptStoryParser } from "./javascript-parser.js";
 
-// Mock the fs module
-vi.mock("node:fs/promises", () => ({
-  readFile: vi.fn(),
-}));
-
 describe("JavaScriptStoryParser", () => {
   beforeEach(() => {
     vi.resetAllMocks();
@@ -29,7 +24,7 @@ describe("JavaScriptStoryParser", () => {
     `;
 
     // Mock the readFile function
-    vi.mocked(fs.readFile).mockResolvedValue(mockFileContent);
+    vi.spyOn(fs, "readFile").mockResolvedValue(mockFileContent);
 
     // Create parser instance
     const parser = new JavaScriptStoryParser({
@@ -63,7 +58,7 @@ describe("JavaScriptStoryParser", () => {
       };
     `;
 
-    vi.mocked(fs.readFile).mockResolvedValue(mockFileContent);
+    vi.spyOn(fs, "readFile").mockResolvedValue(mockFileContent);
 
     const parser = new JavaScriptStoryParser({
       filePath: "/path/to/EmptyStories.stories.jsx",
@@ -92,7 +87,7 @@ describe("JavaScriptStoryParser", () => {
       export const SecondaryLargeButton = () => <Button variant="secondary" size="large">Secondary Large</Button>;
     `;
 
-    vi.mocked(fs.readFile).mockResolvedValue(mockFileContent);
+    vi.spyOn(fs, "readFile").mockResolvedValue(mockFileContent);
 
     const parser = new JavaScriptStoryParser({
       filePath: "/path/to/Button.stories.jsx",
@@ -107,8 +102,9 @@ describe("JavaScriptStoryParser", () => {
   });
 
   it("should handle errors gracefully and return a default story", async () => {
-    // Mock an error during file reading
-    vi.mocked(fs.readFile).mockRejectedValue(new Error("File not found"));
+    // Mock file content will throw an error during parsing
+    const fileContent = "this is not valid JavaScript";
+    vi.spyOn(fs, "readFile").mockResolvedValue(fileContent);
 
     const mockLogger = { error: vi.fn() };
 
@@ -116,6 +112,18 @@ describe("JavaScriptStoryParser", () => {
       filePath: "/path/to/Button.stories.jsx",
       logger: mockLogger as unknown as import("pino").Logger,
     });
+
+    // Create a type that includes the private methods for testing purposes
+    type JavaScriptStoryParserWithPrivates = JavaScriptStoryParser & {
+      extractStoryExports: (_content: string) => Array<{ name: string }>;
+    };
+
+    // Mock a method called by parse to force an error
+    vi.spyOn(parser as JavaScriptStoryParserWithPrivates, "extractStoryExports").mockImplementation(
+      () => {
+        throw new Error("Failed to parse");
+      }
+    );
 
     const stories = await parser.parse();
 

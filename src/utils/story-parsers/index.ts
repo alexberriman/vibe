@@ -54,23 +54,35 @@ export function createStoryParser({
 export async function parseStoryFiles({
   filePaths,
   logger = createLogger(),
+  onProgress,
 }: {
   readonly filePaths: string[];
   readonly logger?: Logger;
+  readonly onProgress?: (_current: number, _total: number) => void;
 }): Promise<StoryMetadata[]> {
   const allStories: StoryMetadata[] = [];
+  const totalFiles = filePaths.length;
 
-  for (const filePath of filePaths) {
+  for (let i = 0; i < filePaths.length; i++) {
+    const filePath = filePaths[i];
     try {
       const parser = createStoryParser({ filePath, logger });
       const stories = await parser.parse();
       allStories.push(...stories);
+
+      // Call the progress callback if provided
+      if (onProgress) {
+        onProgress(i + 1, totalFiles);
+      }
     } catch (error) {
       logger.error(`Failed to parse story file: ${filePath}`);
       if (error instanceof Error) {
         logger.error(error.message);
       }
       // Continue with the next file
+      if (onProgress) {
+        onProgress(i + 1, totalFiles);
+      }
     }
   }
 

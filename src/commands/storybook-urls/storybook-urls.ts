@@ -5,6 +5,7 @@ import { createLogger } from "../../utils/logger.js";
 import { scanDirectory } from "../../utils/directory-scanner.js";
 import { detectStorybookConfig } from "../../utils/storybook-config-detector.js";
 import { parseStoryFiles, type StoryMetadata } from "../../utils/story-parsers/index.js";
+import { ProgressIndicator } from "../../utils/progress-indicator.js";
 
 type StorybookUrlsOptions = {
   readonly path?: string;
@@ -14,6 +15,7 @@ type StorybookUrlsOptions = {
   readonly pretty?: boolean;
   readonly filter?: string;
   readonly frameUrl?: boolean;
+  readonly progress?: boolean;
 };
 
 /**
@@ -100,10 +102,32 @@ async function processStories(
 ): Promise<string[]> {
   // Parse the story files to extract story metadata
   logger.info("Parsing story files...");
+
+  let progress: ProgressIndicator | undefined;
+
+  // Initialize progress indicator if requested
+  if (options.progress) {
+    progress = new ProgressIndicator({
+      total: files.length,
+      title: "Parsing Story Files",
+      logger,
+    });
+  }
+
   const stories = await parseStoryFiles({
     filePaths: files,
     logger,
+    onProgress: (current, _total) => {
+      if (progress) {
+        progress.update(current);
+      }
+    },
   });
+
+  // Complete the progress indicator if it was used
+  if (progress) {
+    progress.complete();
+  }
 
   logger.info(`Found ${stories.length} stories in ${files.length} files`);
   logger.info("Generating Storybook URLs...");
@@ -193,6 +217,7 @@ export function storybookUrlsCommand(): Command {
     .option("--pretty", "Pretty print the JSON output", false)
     .option("-f, --filter <filter>", "Filter stories by pattern")
     .option("--frame-url", "Generate iframe URLs instead of story URLs", false)
+    .option("--progress", "Show progress indicator for large codebases", false)
     .action(async (options: StorybookUrlsOptions) => {
       try {
         const dirPath = options.path || ".";
