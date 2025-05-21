@@ -3,6 +3,11 @@ import fs from "node:fs/promises";
 import type { Logger } from "pino";
 import { createLogger } from "./logger.js";
 import { scanDirectory } from "./directory-scanner.js";
+import {
+  detectNextjsSpecialFile,
+  filterNextjsSpecialFiles,
+  type NextjsFileType,
+} from "./nextjs-special-file-detector.js";
 
 /**
  * Represents a route in the Next.js App Router
@@ -20,7 +25,9 @@ export type NextjsAppRoute = {
   readonly isDynamic: boolean; // Is this a dynamic route? (folder in brackets)
   readonly isCatchAll: boolean; // Is this a catch-all route? (folder with [...])
   readonly isOptionalCatchAll: boolean; // Is this an optional catch-all route? (folder with [[...]])
-  readonly fileType: "page" | "layout" | "route" | "other"; // Type of file
+  readonly fileType: NextjsFileType; // Type of file
+  readonly isClientComponent: boolean; // Is this a client component? (has "use client" directive)
+  readonly isServerComponent: boolean; // Is this a server component? (default in Next.js App Router)
 };
 
 /**
@@ -33,15 +40,11 @@ type AppRouterAnalyzerOptions = {
 
 /**
  * Check if a file path is for a specific file type
+ * @deprecated Use detectNextjsSpecialFile instead
  */
 function isFileType(filePath: string, fileType: string): boolean {
-  const filename = path.basename(filePath);
-  return (
-    filename === `${fileType}.js` ||
-    filename === `${fileType}.jsx` ||
-    filename === `${fileType}.ts` ||
-    filename === `${fileType}.tsx`
-  );
+  const fileInfo = detectNextjsSpecialFile(filePath);
+  return fileInfo.fileType === fileType;
 }
 
 /**
@@ -89,16 +92,13 @@ function parseFilePath(filePath: string, appDirectory: string): NextjsAppRoute {
   // Split the path into segments
   const segments = relativePath.split(path.sep);
 
-  // Check the file type
-  const isPage = isFileType(filePath, "page");
-  const isLayout = isFileType(filePath, "layout");
-  const isRoute = isFileType(filePath, "route");
+  // Detect special file type
+  const fileInfo = detectNextjsSpecialFile(filePath);
 
-  // Determine file type category
-  let fileType: "page" | "layout" | "route" | "other" = "other";
-  if (isPage) fileType = "page";
-  if (isLayout) fileType = "layout";
-  if (isRoute) fileType = "route";
+  // Check the file type for backwards compatibility
+  const isPage = fileInfo.fileType === "page";
+  const isLayout = fileInfo.fileType === "layout";
+  const isRoute = fileInfo.fileType === "route";
 
   // Process the directory segments to build the route path
   // Extract only the directory parts, exclude the file name
@@ -174,7 +174,9 @@ function parseFilePath(filePath: string, appDirectory: string): NextjsAppRoute {
     isDynamic,
     isCatchAll,
     isOptionalCatchAll,
-    fileType,
+    fileType: fileInfo.fileType,
+    isClientComponent: fileInfo.isClientComponent,
+    isServerComponent: fileInfo.isServerComponent,
   };
 }
 
@@ -214,14 +216,19 @@ export async function analyzeAppRouter({
     logger,
   });
 
-  // Filter for relevant route files (page, layout, route)
+  // Filter for relevant route files using the special file detector
   const routeFiles = files.filter((file) => {
-    const filename = path.basename(file);
-    return (
-      filename.startsWith("page.") ||
-      filename.startsWith("layout.") ||
-      filename.startsWith("route.")
-    );
+    const fileInfo = detectNextjsSpecialFile(file);
+    return [
+      "page",
+      "layout",
+      "route",
+      "loading",
+      "not-found",
+      "error",
+      "template",
+      "default",
+    ].includes(fileInfo.fileType);
   });
 
   logger.info(`Found ${routeFiles.length} route files in the App Router`);
@@ -229,14 +236,30 @@ export async function analyzeAppRouter({
   // Parse each file to extract route information
   const routes = routeFiles.map((file) => parseFilePath(file, appDirectory));
 
-  // Log some summary information
+  // Log summary information with enhanced file type detection
   const pageRoutes = routes.filter((route) => route.isPage);
   const apiRoutes = routes.filter((route) => route.isRoute);
   const dynamicRoutes = routes.filter((route) => route.isDynamic);
+  const layoutRoutes = routes.filter((route) => route.isLayout);
+  const loadingRoutes = routes.filter((route) => route.fileType === "loading");
+  const errorRoutes = routes.filter((route) => route.fileType === "error");
+  const notFoundRoutes = routes.filter((route) => route.fileType === "not-found");
+  const templateRoutes = routes.filter((route) => route.fileType === "template");
+  const defaultRoutes = routes.filter((route) => route.fileType === "default");
+  const clientComponents = routes.filter((route) => route.isClientComponent);
+  const serverComponents = routes.filter((route) => route.isServerComponent);
 
   logger.info(`Found ${pageRoutes.length} page routes`);
   logger.info(`Found ${apiRoutes.length} API routes`);
+  logger.info(`Found ${layoutRoutes.length} layout files`);
+  logger.info(`Found ${loadingRoutes.length} loading files`);
+  logger.info(`Found ${errorRoutes.length} error handling files`);
+  logger.info(`Found ${notFoundRoutes.length} not-found files`);
+  logger.info(`Found ${templateRoutes.length} template files`);
+  logger.info(`Found ${defaultRoutes.length} default files`);
   logger.info(`Found ${dynamicRoutes.length} dynamic routes`);
+  logger.info(`Found ${clientComponents.length} client components`);
+  logger.info(`Found ${serverComponents.length} server components`);
 
   return routes;
 }

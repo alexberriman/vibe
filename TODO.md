@@ -94,7 +94,7 @@ Create a CLI tool that analyzes a Next.js app directory and generates a JSON arr
 [✅] Develop Next.js configuration detector to find port settings (default: 3000)
 [✅] Build file system analyzer for app router directory structure
 [✅] Create file system analyzer for pages router directory structure
-[ ] Implement special file detection (page.js/tsx, layout.js/tsx, route.js/tsx)
+[✅] Implement special file detection (page.js/tsx, layout.js/tsx, route.js/tsx)
 [ ] Create parser for app router route groups (folders with parentheses)
 [ ] Add support for parallel routes (folders with @ prefix)
 [ ] Build handler for dynamic route segments ([param], [...catchAll], [[...optionalCatchAll]])

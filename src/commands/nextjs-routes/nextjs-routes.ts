@@ -21,6 +21,8 @@ type NextjsRoutesOptions = {
   readonly type?: string;
 };
 
+import { type NextjsFileType } from "../../utils/nextjs-special-file-detector.js";
+
 /**
  * Represents a route in the Next.js application
  */
@@ -28,8 +30,11 @@ type NextjsRouteInfo = {
   readonly path: string;
   readonly url: string;
   readonly type: "page" | "api";
+  readonly fileType: NextjsFileType;
   readonly hasDynamicSegments: boolean;
   readonly source: "app" | "pages";
+  readonly isClientComponent?: boolean;
+  readonly isServerComponent?: boolean;
 };
 
 /**
@@ -46,8 +51,11 @@ function convertAppRouteToRouteInfo(appRoute: NextjsAppRoute, baseUrl: string): 
     path: appRoute.routePath,
     url,
     type: routeType,
+    fileType: appRoute.fileType,
     hasDynamicSegments: appRoute.isDynamic,
     source: "app",
+    isClientComponent: appRoute.isClientComponent,
+    isServerComponent: appRoute.isServerComponent,
   };
 }
 
@@ -68,8 +76,11 @@ function convertPagesRouteToRouteInfo(
     path: pagesRoute.routePath,
     url,
     type: routeType,
+    fileType: pagesRoute.fileType,
     hasDynamicSegments: pagesRoute.isDynamic,
     source: "pages",
+    isClientComponent: pagesRoute.isClientComponent,
+    isServerComponent: pagesRoute.isServerComponent,
   };
 }
 

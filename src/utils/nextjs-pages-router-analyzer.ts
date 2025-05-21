@@ -3,6 +3,11 @@ import fs from "node:fs/promises";
 import type { Logger } from "pino";
 import { createLogger } from "./logger.js";
 import { scanDirectory } from "./directory-scanner.js";
+import {
+  detectNextjsSpecialFile,
+  filterNextjsSpecialFiles,
+  type NextjsFileType,
+} from "./nextjs-special-file-detector.js";
 
 /**
  * Represents a route in the Next.js Pages Router
@@ -16,7 +21,10 @@ export type NextjsPagesRoute = {
   readonly isDynamic: boolean; // Is this a dynamic route? (folder or file in brackets)
   readonly isCatchAll: boolean; // Is this a catch-all route? (with [...])
   readonly isOptionalCatchAll: boolean; // Is this an optional catch-all route? (with [[...]])
-  readonly fileType: "page" | "api" | "other"; // Type of file
+  readonly fileType: NextjsFileType; // Type of file
+  readonly isSpecialFile: boolean; // Is this a special Next.js file?
+  readonly isClientComponent: boolean; // Is this a client component?
+  readonly isServerComponent: boolean; // Is this a server component?
 };
 
 /**
@@ -163,11 +171,17 @@ function parseFilePath(filePath: string, pagesDir: string): NextjsPagesRoute {
     }
   }
 
-  // Determine file type
-  let fileType: "page" | "api" | "other" = "other";
+  // Use the special file detector to get enhanced file information
+  const fileInfo = detectNextjsSpecialFile(filePath);
+
+  // Determine file type for the Pages Router
+  let fileType = fileInfo.fileType;
+
+  // All API routes should be categorized as "api" type
   if (isApi) {
     fileType = "api";
-  } else {
+  } else if (fileType === "other") {
+    // In Pages Router, any non-API file that's not a special file is a page
     fileType = "page";
   }
 
@@ -181,6 +195,9 @@ function parseFilePath(filePath: string, pagesDir: string): NextjsPagesRoute {
     isCatchAll,
     isOptionalCatchAll,
     fileType,
+    isSpecialFile: fileInfo.isSpecialFile,
+    isClientComponent: fileInfo.isClientComponent,
+    isServerComponent: fileInfo.isServerComponent,
   };
 }
 
@@ -220,16 +237,27 @@ export async function analyzePagesRouter({
     logger,
   });
 
-  // Filter out non-route files (e.g. _app.js, _document.js)
+  // Filter out non-route files using our specialized file detector
   const routeFiles = files.filter((file) => {
+    // Get enhanced file information
+    const fileInfo = detectNextjsSpecialFile(file);
+
+    // If it's a recognized special file, keep it
+    if (fileInfo.isSpecialFile) {
+      return true;
+    }
+
     const filename = path.basename(file);
-    // Exclude Next.js special files
-    return !(
+    // Exclude Next.js special files that start with underscore
+    // These are configuration files, not routes
+    const isConfigFile =
       filename.startsWith("_app.") ||
       filename.startsWith("_document.") ||
       filename.startsWith("_error.") ||
-      filename.startsWith("_middleware.")
-    );
+      filename.startsWith("_middleware.");
+
+    // In Pages Router, all files except config files become routes
+    return !isConfigFile;
   });
 
   logger.info(`Found ${routeFiles.length} route files in the Pages Router`);
@@ -237,14 +265,34 @@ export async function analyzePagesRouter({
   // Parse each file to extract route information
   const routes = routeFiles.map((file) => parseFilePath(file, pagesDirectory));
 
-  // Log some summary information
+  // Log enhanced summary information with special file detection
   const pageRoutes = routes.filter((route) => route.fileType === "page");
   const apiRoutes = routes.filter((route) => route.fileType === "api");
   const dynamicRoutes = routes.filter((route) => route.isDynamic);
+  const layoutRoutes = routes.filter((route) => route.fileType === "layout");
+  const loadingRoutes = routes.filter((route) => route.fileType === "loading");
+  const errorRoutes = routes.filter((route) => route.fileType === "error");
+  const notFoundRoutes = routes.filter((route) => route.fileType === "not-found");
+  const templateRoutes = routes.filter((route) => route.fileType === "template");
+  const specialFiles = routes.filter((route) => route.isSpecialFile);
+  const clientComponents = routes.filter((route) => route.isClientComponent);
+  const serverComponents = routes.filter((route) => route.isServerComponent);
 
   logger.info(`Found ${pageRoutes.length} page routes`);
   logger.info(`Found ${apiRoutes.length} API routes`);
   logger.info(`Found ${dynamicRoutes.length} dynamic routes`);
+  logger.info(`Found ${specialFiles.length} special Next.js files`);
+
+  // Log additional special file types if any are found
+  if (layoutRoutes.length > 0) logger.info(`Found ${layoutRoutes.length} layout files`);
+  if (loadingRoutes.length > 0) logger.info(`Found ${loadingRoutes.length} loading files`);
+  if (errorRoutes.length > 0) logger.info(`Found ${errorRoutes.length} error handling files`);
+  if (notFoundRoutes.length > 0) logger.info(`Found ${notFoundRoutes.length} not-found files`);
+  if (templateRoutes.length > 0) logger.info(`Found ${templateRoutes.length} template files`);
+  if (clientComponents.length > 0)
+    logger.info(`Found ${clientComponents.length} client components`);
+  if (serverComponents.length > 0)
+    logger.info(`Found ${serverComponents.length} server components`);
 
   return routes;
 }
