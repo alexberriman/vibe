@@ -3,6 +3,7 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import { createLogger } from "../../utils/logger.js";
 import { scanDirectory } from "../../utils/directory-scanner.js";
+import { detectStorybookConfig } from "../../utils/storybook-config-detector.js";
 
 type StorybookUrlsOptions = {
   readonly path?: string;
@@ -73,12 +74,35 @@ export function storybookUrlsCommand(): Command {
     .action(async (options: StorybookUrlsOptions) => {
       try {
         const dirPath = options.path || ".";
-        const port = options.port ? Number(options.port) : 6006;
+        let port = options.port ? Number(options.port) : 0;
         const extensions = options.extensions
           ? parseExtensions(options.extensions)
           : [".stories.tsx", ".stories.jsx", ".stories.ts", ".stories.js"];
 
         logger.info(`Scanning directory: ${dirPath}`);
+
+        // Detect Storybook configuration
+        logger.info("Detecting Storybook configuration...");
+        const configResult = await detectStorybookConfig({ basePath: dirPath, logger });
+
+        if (configResult.configPath) {
+          logger.info(`Found Storybook configuration: ${configResult.configPath}`);
+
+          // Use detected port if available and no port was specified via options
+          if (configResult.port && !options.port) {
+            port = configResult.port;
+            logger.info(`Using detected Storybook port: ${port}`);
+          }
+        } else {
+          logger.info("No Storybook configuration detected, using defaults");
+        }
+
+        // If no port was detected or specified, use the default
+        if (port === 0) {
+          port = 6006;
+          logger.info(`Using default Storybook port: ${port}`);
+        }
+
         logger.info(`Looking for files with extensions: ${extensions.join(", ")}`);
 
         // Scan the directory for story files
