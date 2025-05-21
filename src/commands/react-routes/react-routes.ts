@@ -7,7 +7,11 @@ import {
   findRouterDefinitionFiles,
   type RouterFileInfo,
 } from "../../utils/react-router-detector.js";
-import { parseJSXRoutes, type RouteInfo } from "../../utils/route-parsers/index.js";
+import {
+  parseJSXRoutes,
+  parseObjectRoutes,
+  type RouteInfo,
+} from "../../utils/route-parsers/index.js";
 
 type ReactRoutesOptions = {
   readonly path?: string;
@@ -115,8 +119,13 @@ async function extractRoutes(
         const routes = await parseJSXRoutes(file.filePath, { logger });
         allRoutes.push(...routes);
         logger.info(`Extracted ${routes.length} routes from ${file.filePath}`);
+      } else if (file.routerType === "object") {
+        // Parse object-based routes
+        const routes = await parseObjectRoutes(file.filePath, { logger });
+        allRoutes.push(...routes);
+        logger.info(`Extracted ${routes.length} routes from ${file.filePath}`);
       }
-      // Other route types will be implemented in subsequent tasks
+      // Data router API will be implemented in subsequent tasks
     } catch (error) {
       logger.error(`Failed to extract routes from ${file.filePath}`);
       if (error instanceof Error) {
