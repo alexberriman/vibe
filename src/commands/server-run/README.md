@@ -16,6 +16,7 @@ vibe server-run [options]
 | `--port <port>` | `-p` | Port to check for availability | - |
 | `--url <url>` | `-u` | URL to poll for readiness | - |
 | `--timeout <timeout>` | `-t` | Timeout in milliseconds before giving up | 60000 (60 seconds) |
+| `--interval <interval>` | `-i` | Interval in milliseconds between readiness checks | 1000 (1 second) |
 | `--wait` | `-w` | Wait for server to be ready | `true` |
 | `--verbose` | `-v` | Verbose output | `false` |
 | `--keep-alive` | `-k` | Keep server running after command execution | `false` |
@@ -36,16 +37,16 @@ vibe server-run --command "npm run storybook" --port 6006
 vibe server-run --command "npm run dev" --url "http://localhost:3000" --run-command "npm run test:e2e"
 ```
 
-### Start a server with a custom timeout and keep it running afterward
+### Start a server with a custom timeout and polling interval
 
 ```bash
-vibe server-run --command "npm run dev" --timeout 120000 --keep-alive
+vibe server-run --command "npm run dev" --timeout 120000 --interval 2000
 ```
 
-### Start a server with custom environment variables
+### Start a server with custom environment variables and keep it running afterward
 
 ```bash
-vibe server-run --command "npm run dev" --env "NODE_ENV=production,DEBUG=true"
+vibe server-run --command "npm run dev" --env "NODE_ENV=production,DEBUG=true" --keep-alive
 ```
 
 ## Features
@@ -56,6 +57,7 @@ vibe server-run --command "npm run dev" --env "NODE_ENV=production,DEBUG=true"
 - Execute commands against the running server
 - Automatically tear down the server after command execution
 - Configurable timeout for server readiness
+- Customizable polling interval for readiness checks
 - Detailed logging with different verbosity levels
 - Support for environment variable passing
 - Option to keep the server running after command completion
