@@ -1,5 +1,8 @@
 import { Command } from "commander";
+import path from "node:path";
+import fs from "node:fs/promises";
 import { createLogger } from "../../utils/logger.js";
+import { scanDirectory } from "../../utils/directory-scanner.js";
 
 type StorybookUrlsOptions = {
   readonly path?: string;
@@ -9,6 +12,44 @@ type StorybookUrlsOptions = {
   readonly pretty?: boolean;
   readonly filter?: string;
 };
+
+/**
+ * Parse a list of comma-separated extensions
+ */
+function parseExtensions(extensions: string): string[] {
+  return extensions
+    .split(",")
+    .map((ext) => ext.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Generate Storybook URLs from a list of story files
+ */
+function generateStorybookUrls({
+  files,
+  port = 6006,
+  filter,
+}: {
+  readonly files: string[];
+  readonly port?: number;
+  readonly filter?: string;
+}): string[] {
+  // Filter the files if a filter pattern is provided
+  const filteredFiles = filter ? files.filter((file) => file.includes(filter)) : files;
+
+  // Generate Storybook URLs
+  return filteredFiles.map((file) => {
+    // Extract the component name and stories from the file
+    // This is a simplified approach and would need to be enhanced
+    // to actually parse the story files in a future implementation
+    const fileName = path.basename(file).replace(/\.stories\.(tsx|jsx|ts|js)$/, "");
+
+    // Generate a simple URL for now - this would be improved in future tasks
+    // that parse the actual stories from the file
+    return `http://localhost:${port}/?path=/story/${fileName.toLowerCase()}--primary`;
+  });
+}
 
 /**
  * Create a storybook-urls command
@@ -31,20 +72,37 @@ export function storybookUrlsCommand(): Command {
     .option("-f, --filter <filter>", "Filter stories by pattern")
     .action(async (options: StorybookUrlsOptions) => {
       try {
-        logger.info(`Scanning directory: ${options.path || "."}`);
+        const dirPath = options.path || ".";
+        const port = options.port ? Number(options.port) : 6006;
+        const extensions = options.extensions
+          ? parseExtensions(options.extensions)
+          : [".stories.tsx", ".stories.jsx", ".stories.ts", ".stories.js"];
+
+        logger.info(`Scanning directory: ${dirPath}`);
+        logger.info(`Looking for files with extensions: ${extensions.join(", ")}`);
+
+        // Scan the directory for story files
+        const files = await scanDirectory({
+          basePath: dirPath,
+          fileExtensions: extensions,
+          logger,
+        });
+
+        logger.info(`Found ${files.length} story files`);
         logger.info("Generating Storybook URLs...");
 
-        // TODO: Implement the actual URL generation logic
-
-        // Placeholder for the actual implementation
-        const urls = [
-          "http://localhost:6006/?path=/story/example-button--primary",
-          "http://localhost:6006/?path=/story/example-button--secondary",
-        ];
+        // Generate Storybook URLs from the files
+        const urls = generateStorybookUrls({
+          files,
+          port,
+          filter: options.filter,
+        });
 
         if (options.output) {
           logger.info(`Writing output to: ${options.output}`);
-          // TODO: Implement file writing logic
+          // Write the output to a file
+          const output = options.pretty ? JSON.stringify(urls, null, 2) : JSON.stringify(urls);
+          await fs.writeFile(options.output, output, "utf8");
         } else {
           // Pretty print JSON if requested
           const output = options.pretty ? JSON.stringify(urls, null, 2) : JSON.stringify(urls);
