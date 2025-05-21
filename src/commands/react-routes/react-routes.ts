@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import { createLogger } from "../../utils/logger.js";
 import { scanDirectory } from "../../utils/directory-scanner.js";
 import { detectViteConfig } from "../../utils/vite-config-detector.js";
+import { findRouterDefinitionFiles } from "../../utils/react-router-detector.js";
 
 type ReactRoutesOptions = {
   readonly path?: string;
@@ -119,12 +120,26 @@ export function reactRoutesCommand(): Command {
         const _port = await detectDevPort(dirPath, options.port, logger);
 
         // Find potential router files
-        const _files = await findRouterFiles(dirPath, extensions, logger);
+        const files = await findRouterFiles(dirPath, extensions, logger);
 
-        // TODO: Implement router detection and route generation
+        // Detect React Router definition files
+        logger.info("Searching for React Router definition files...");
+        const routerFiles = await findRouterDefinitionFiles(files, { logger });
 
-        // Placeholder implementation
+        // Log detection results
+        if (routerFiles.length > 0) {
+          logger.info(`Found ${routerFiles.length} React Router definition files:`);
+          routerFiles.forEach((file) => {
+            logger.info(`- ${file.filePath} (type: ${file.routerType})`);
+          });
+        } else {
+          logger.warn("No React Router definition files found in the scanned directory");
+        }
+
+        // Placeholder for routes extraction - to be implemented in subsequent tasks
         const routes: string[] = [];
+
+        // Format the output
         const output = options.pretty ? JSON.stringify(routes, null, 2) : JSON.stringify(routes);
 
         if (options.output) {
