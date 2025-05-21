@@ -7,6 +7,7 @@ import { reactRoutesCommand } from "./commands/react-routes/index.js";
 import { nextjsRoutesCommand } from "./commands/nextjs-routes/index.js";
 import { domAuditCommand } from "./commands/dom-audit/index.js";
 import { screenshotCommand } from "./commands/screenshot/index.js";
+import { designFeedbackCommand } from "./commands/design-feedback/index.js";
 
 // Create the main CLI program
 const program = new Command();
@@ -25,6 +26,7 @@ program.addCommand(reactRoutesCommand());
 program.addCommand(nextjsRoutesCommand());
 program.addCommand(domAuditCommand());
 program.addCommand(screenshotCommand());
+program.addCommand(designFeedbackCommand());
 
 // Parse arguments and execute the matching command
 program.parse(process.argv);
