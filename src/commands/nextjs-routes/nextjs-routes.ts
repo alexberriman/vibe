@@ -6,6 +6,7 @@ import {
   detectNextjsStructure,
   type NextjsStructure,
 } from "../../utils/nextjs-structure-detector.js";
+import { detectNextjsConfig } from "../../utils/nextjs-config-detector.js";
 
 type NextjsRoutesOptions = {
   readonly path?: string;
@@ -37,7 +38,7 @@ function getNextjsFileExtensions(): string[] {
 async function scanNextjsProject(
   dirPath: string,
   logger = createLogger()
-): Promise<{ files: string[]; structure: NextjsStructure }> {
+): Promise<{ files: string[]; structure: NextjsStructure; port: number }> {
   logger.info(`Scanning Next.js project directory: ${dirPath}`);
 
   // Detect Next.js project structure (app router and/or pages router)
@@ -57,6 +58,18 @@ async function scanNextjsProject(
     logger.warn("Could not detect Next.js router structure in the project");
   }
 
+  // Detect Next.js port configuration
+  const configResult = await detectNextjsConfig({
+    basePath: dirPath,
+    logger,
+  });
+
+  if (configResult.configFound) {
+    logger.info(`Detected Next.js port ${configResult.port} from ${configResult.configSource}`);
+  } else {
+    logger.info(`Using default Next.js port: ${configResult.port}`);
+  }
+
   const extensions = getNextjsFileExtensions();
   logger.info(`Looking for files with extensions: ${extensions.join(", ")}`);
 
@@ -67,7 +80,7 @@ async function scanNextjsProject(
   });
 
   logger.info(`Found ${files.length} files matching extensions`);
-  return { files, structure };
+  return { files, structure, port: configResult.port };
 }
 
 /**
@@ -82,7 +95,7 @@ export function nextjsRoutesCommand(): Command {
       "Analyzes a Next.js app directory and generates a JSON array of application routes as URLs"
     )
     .option("-p, --path <path>", "Directory path to scan for Next.js routes", ".")
-    .option("-P, --port <port>", "Next.js development server port", "3000")
+    .option("-P, --port <port>", "Next.js development server port (overrides detected port)")
     .option("-o, --output <o>", "Output file path (default: print to console)")
     .option("--pretty", "Pretty print the JSON output", false)
     .option("-f, --filter <filter>", "Filter routes by pattern")
@@ -91,8 +104,11 @@ export function nextjsRoutesCommand(): Command {
       try {
         const dirPath = options.path || ".";
 
-        // Scan the Next.js project directory and detect structure
-        const { files, structure } = await scanNextjsProject(dirPath, logger);
+        // Scan the Next.js project directory and detect structure and configuration
+        const { files, structure, port } = await scanNextjsProject(dirPath, logger);
+
+        // Use the detected port, unless overridden by command line option
+        const resultPort = options.port ? Number(options.port) : port;
 
         // TODO: Implement route parsing logic based on detected structure
 
@@ -100,7 +116,7 @@ export function nextjsRoutesCommand(): Command {
         const result = {
           info: "Next.js routes analysis in development",
           scannedDirectory: dirPath,
-          port: options.port || 3000,
+          port: resultPort,
           filesFound: files.length,
           structure: {
             hasAppRouter: structure.hasAppRouter,

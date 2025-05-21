@@ -33,6 +33,13 @@ vi.mock("../../utils/nextjs-structure-detector.js", () => ({
   }),
 }));
 
+vi.mock("../../utils/nextjs-config-detector.js", () => ({
+  detectNextjsConfig: vi.fn().mockResolvedValue({
+    port: 3000,
+    configFound: false,
+  }),
+}));
+
 describe("nextjsRoutesCommand", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -63,5 +70,12 @@ describe("nextjsRoutesCommand", () => {
     expect(options).toContain("--pretty");
     expect(options).toContain("-f, --filter <filter>");
     expect(options).toContain("-t, --type <type>");
+  });
+
+  it("should describe the port option as being able to override detected port", () => {
+    const command = nextjsRoutesCommand();
+    const portOption = command.options.find((opt) => opt.flags === "-P, --port <port>");
+
+    expect(portOption?.description).toContain("overrides detected port");
   });
 });
