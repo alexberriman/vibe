@@ -131,11 +131,11 @@ Create a simple wrapper for the @alexberriman/screenshotter package.
 
 ### Core Functionality
 
-[ ] Set up the command structure (`commands/screenshot/`)
-[ ] Implement basic CLI argument handling using Commander.js
-[ ] Create direct wrapper for npx @alexberriman/screenshotter
-[ ] Pass through all command-line arguments to the underlying package
-[ ] Add command documentation to README.md
+[✅] Set up the command structure (`commands/screenshot/`)
+[✅] Implement basic CLI argument handling using Commander.js
+[✅] Create direct wrapper for npx @alexberriman/screenshotter
+[✅] Pass through all command-line arguments to the underlying package
+[✅] Add command documentation to README.md
 
 ---
 

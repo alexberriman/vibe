@@ -41,6 +41,10 @@ vi.mock("./commands/dom-audit/index.js", () => ({
   domAuditCommand: vi.fn().mockReturnValue("mocked-dom-audit-command"),
 }));
 
+vi.mock("./commands/screenshot/index.js", () => ({
+  screenshotCommand: vi.fn().mockReturnValue("mocked-screenshot-command"),
+}));
+
 describe("CLI", () => {
   it("should initialize correctly", async () => {
     // Reset process.argv for the test
@@ -71,6 +75,7 @@ describe("CLI", () => {
     expect(mockCommandInstance.addCommand).toHaveBeenCalledWith("mocked-react-routes-command");
     expect(mockCommandInstance.addCommand).toHaveBeenCalledWith("mocked-nextjs-routes-command");
     expect(mockCommandInstance.addCommand).toHaveBeenCalledWith("mocked-dom-audit-command");
+    expect(mockCommandInstance.addCommand).toHaveBeenCalledWith("mocked-screenshot-command");
 
     // Verify that parse was called with process.argv
     expect(mockCommandInstance.parse).toHaveBeenCalledWith(process.argv);
