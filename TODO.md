@@ -66,17 +66,17 @@ Create a CLI tool that analyzes a React app directory and generates a JSON array
 [✅] Create directory scanning utility that respects .gitignore patterns
 [✅] Implement Vite configuration detector to find port settings (default: 5173)
 [✅] Create React Router detection logic (find router definition files in both TS and JS)
-[ ] Build parser for JSX-style routes that handles both TSX and JSX syntax
+[✅] Build parser for JSX-style routes that handles both TSX and JSX syntax
 [ ] Implement parser for object-based routes with support for TS and JS differences
 [ ] Add support for data router API with TypeScript generics and JavaScript implementations
-[ ] Handle nested route extraction and path building
-[ ] Create system for handling dynamic route parameters (e.g., `/users/:id`)
-[ ] Develop base URL construction with correct protocol, host, and port
+[✅] Handle nested route extraction and path building
+[✅] Create system for handling dynamic route parameters (e.g., `/users/:id`)
+[✅] Develop base URL construction with correct protocol, host, and port
 [ ] Build modular router detection system for future expansions
-[ ] Build JSON output formatter
-[ ] Implement pretty-print option for formatted output
-[ ] Add option to save output to file (default: print to console)
-[ ] Add option to filter routes by pattern
+[✅] Build JSON output formatter
+[✅] Implement pretty-print option for formatted output
+[✅] Add option to save output to file (default: print to console)
+[✅] Add option to filter routes by pattern
 [✅] Create detailed command README.md with usage examples
 
 ---

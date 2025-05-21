@@ -3,7 +3,11 @@ import fs from "node:fs/promises";
 import { createLogger } from "../../utils/logger.js";
 import { scanDirectory } from "../../utils/directory-scanner.js";
 import { detectViteConfig } from "../../utils/vite-config-detector.js";
-import { findRouterDefinitionFiles } from "../../utils/react-router-detector.js";
+import {
+  findRouterDefinitionFiles,
+  type RouterFileInfo,
+} from "../../utils/react-router-detector.js";
+import { parseJSXRoutes, type RouteInfo } from "../../utils/route-parsers/index.js";
 
 type ReactRoutesOptions = {
   readonly path?: string;
@@ -12,6 +16,12 @@ type ReactRoutesOptions = {
   readonly pretty?: boolean;
   readonly filter?: string;
   readonly extensions?: string;
+};
+
+type RouteUrl = {
+  readonly path: string;
+  readonly url: string;
+  readonly hasDynamicSegments: boolean;
 };
 
 /**
@@ -88,6 +98,97 @@ async function detectDevPort(
 }
 
 /**
+ * Extract routes from router files
+ */
+async function extractRoutes(
+  routerFiles: RouterFileInfo[],
+  logger = createLogger()
+): Promise<RouteInfo[]> {
+  const allRoutes: RouteInfo[] = [];
+
+  for (const file of routerFiles) {
+    logger.info(`Extracting routes from: ${file.filePath} (${file.routerType})`);
+
+    try {
+      if (file.routerType === "jsx") {
+        // Parse JSX-style routes
+        const routes = await parseJSXRoutes(file.filePath, { logger });
+        allRoutes.push(...routes);
+        logger.info(`Extracted ${routes.length} routes from ${file.filePath}`);
+      }
+      // Other route types will be implemented in subsequent tasks
+    } catch (error) {
+      logger.error(`Failed to extract routes from ${file.filePath}`);
+      if (error instanceof Error) {
+        logger.error(error.message);
+      }
+    }
+  }
+
+  return allRoutes;
+}
+
+/**
+ * Generate URLs from route information
+ */
+function generateRouteUrls(routes: RouteInfo[], baseUrl: string, filter?: string): RouteUrl[] {
+  const urls: RouteUrl[] = [];
+  const filterRegex = filter ? new RegExp(filter, "i") : null;
+
+  function processRoute(route: RouteInfo, parentUrl = ""): void {
+    // Skip index routes (they use the parent URL)
+    if (route.index) {
+      const url = parentUrl || baseUrl;
+
+      if (!filterRegex || filterRegex.test(url)) {
+        urls.push({
+          path: parentUrl || "/",
+          url,
+          hasDynamicSegments: false,
+        });
+      }
+
+      return;
+    }
+
+    // Skip routes without a path
+    if (!route.path) {
+      return;
+    }
+
+    // Build the full URL
+    const fullPath = route.path.startsWith("/")
+      ? route.path
+      : `${parentUrl}/${route.path}`.replace(/\/+/g, "/");
+
+    const url = `${baseUrl}${fullPath}`;
+
+    // Add the URL if it matches the filter (or if there's no filter)
+    if (!filterRegex || filterRegex.test(url)) {
+      urls.push({
+        path: fullPath,
+        url,
+        hasDynamicSegments: route.hasDynamicSegments || false,
+      });
+    }
+
+    // Process child routes
+    if (route.children && route.children.length > 0) {
+      for (const child of route.children) {
+        processRoute(child, fullPath);
+      }
+    }
+  }
+
+  // Process all routes
+  for (const route of routes) {
+    processRoute(route);
+  }
+
+  return urls;
+}
+
+/**
  * Create a react-routes command
  */
 export function reactRoutesCommand(): Command {
@@ -117,7 +218,9 @@ export function reactRoutesCommand(): Command {
         logger.info(`Looking for files with extensions: ${extensions.join(", ")}`);
 
         // Detect port for URL generation
-        const _port = await detectDevPort(dirPath, options.port, logger);
+        const port = await detectDevPort(dirPath, options.port, logger);
+        const baseUrl = `http://localhost:${port}`;
+        logger.info(`Using base URL: ${baseUrl}`);
 
         // Find potential router files
         const files = await findRouterFiles(dirPath, extensions, logger);
@@ -136,11 +239,18 @@ export function reactRoutesCommand(): Command {
           logger.warn("No React Router definition files found in the scanned directory");
         }
 
-        // Placeholder for routes extraction - to be implemented in subsequent tasks
-        const routes: string[] = [];
+        // Extract routes from router files
+        const routes = await extractRoutes(routerFiles, logger);
+        logger.info(`Total routes extracted: ${routes.length}`);
+
+        // Generate URLs from route information
+        const routeUrls = generateRouteUrls(routes, baseUrl, options.filter);
+        logger.info(`Generated ${routeUrls.length} route URLs`);
 
         // Format the output
-        const output = options.pretty ? JSON.stringify(routes, null, 2) : JSON.stringify(routes);
+        const output = options.pretty
+          ? JSON.stringify(routeUrls, null, 2)
+          : JSON.stringify(routeUrls);
 
         if (options.output) {
           logger.info(`Writing output to: ${options.output}`);
