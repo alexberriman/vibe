@@ -117,11 +117,11 @@ Create a simple wrapper for the @alexberriman/visual-dom-auditor package.
 
 ### Core Functionality
 
-[ ] Set up the command structure (`commands/dom-audit/`)
-[ ] Implement basic CLI argument handling using Commander.js
-[ ] Create direct wrapper for npx @alexberriman/visual-dom-auditor
-[ ] Pass through all command-line arguments to the underlying package
-[ ] Add command documentation to README.md
+[✅] Set up the command structure (`commands/dom-audit/`)
+[✅] Implement basic CLI argument handling using Commander.js
+[✅] Create direct wrapper for npx @alexberriman/visual-dom-auditor
+[✅] Pass through all command-line arguments to the underlying package
+[✅] Add command documentation to README.md
 
 ---
 
