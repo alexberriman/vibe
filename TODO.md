@@ -15,13 +15,13 @@ Create a CLI tool that scans a directory for Storybook stories and generates a J
 [✅] Create directory scanning utility that respects .gitignore patterns
 [✅] Develop Storybook configuration detector to find .storybook directory or config files
 [✅] Build file extension filter to identify story files (.stories.tsx, .stories.ts, .stories.jsx, .stories.js, etc.)
-[ ] Create parsers for both TypeScript and JavaScript story files
-[ ] Implement shared parser logic with format-specific adaptations
-[ ] Implement URL generator for both regular and frame URLs
-[ ] Add port detection or configuration (default: 6006)
-[ ] Build JSON output formatter
-[ ] Implement pretty-print option for formatted output
-[ ] Add filtering options (by component type, file path, etc.)
+[✅] Create parsers for both TypeScript and JavaScript story files
+[✅] Implement shared parser logic with format-specific adaptations
+[✅] Implement URL generator for both regular and frame URLs
+[✅] Add port detection or configuration (default: 6006)
+[✅] Build JSON output formatter
+[✅] Implement pretty-print option for formatted output
+[✅] Add filtering options (by component type, file path, etc.)
 [ ] Create progress indicator for large codebases
 [ ] Add option to save output to file (default: print to console)
 [ ] Create detailed command README.md with usage examples
