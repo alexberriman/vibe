@@ -1,12 +1,12 @@
 import { Command } from "commander";
 import fs from "node:fs/promises";
 import { createLogger } from "../../utils/logger.js";
-import { scanDirectory } from "../../utils/directory-scanner.js";
 import {
   detectNextjsStructure,
   type NextjsStructure,
 } from "../../utils/nextjs-structure-detector.js";
 import { detectNextjsConfig } from "../../utils/nextjs-config-detector.js";
+import { analyzeAppRouter, type NextjsAppRoute } from "../../utils/nextjs-app-router-analyzer.js";
 
 type NextjsRoutesOptions = {
   readonly path?: string;
@@ -17,19 +17,57 @@ type NextjsRoutesOptions = {
   readonly type?: string;
 };
 
-// This type will be used in future implementations
-type _NextjsRouteInfo = {
+/**
+ * Represents a route in the Next.js application
+ */
+type NextjsRouteInfo = {
   readonly path: string;
   readonly url: string;
   readonly type: "page" | "api";
   readonly hasDynamicSegments: boolean;
+  readonly source: "app" | "pages";
 };
 
 /**
- * Get the relevant file extensions for Next.js files
+ * Convert an app router route to a route info object
  */
-function getNextjsFileExtensions(): string[] {
-  return [".js", ".jsx", ".ts", ".tsx"];
+function convertAppRouteToRouteInfo(appRoute: NextjsAppRoute, baseUrl: string): NextjsRouteInfo {
+  // Determine the route type
+  const routeType = appRoute.isRoute ? "api" : "page";
+
+  // Build the full URL
+  const url = `${baseUrl}${appRoute.routePath}`;
+
+  return {
+    path: appRoute.routePath,
+    url,
+    type: routeType,
+    hasDynamicSegments: appRoute.isDynamic,
+    source: "app",
+  };
+}
+
+/**
+ * Filter routes based on options
+ */
+function filterRoutes(
+  routes: NextjsRouteInfo[],
+  options: { filter?: string; type?: string }
+): NextjsRouteInfo[] {
+  let filteredRoutes = [...routes];
+
+  // Filter by route type if specified
+  if (options.type && options.type !== "all") {
+    filteredRoutes = filteredRoutes.filter((route) => route.type === options.type);
+  }
+
+  // Filter by pattern if specified
+  if (options.filter) {
+    const pattern = new RegExp(options.filter, "i");
+    filteredRoutes = filteredRoutes.filter((route) => pattern.test(route.path));
+  }
+
+  return filteredRoutes;
 }
 
 /**
@@ -38,7 +76,7 @@ function getNextjsFileExtensions(): string[] {
 async function scanNextjsProject(
   dirPath: string,
   logger = createLogger()
-): Promise<{ files: string[]; structure: NextjsStructure; port: number }> {
+): Promise<{ structure: NextjsStructure; port: number; appRoutes: NextjsAppRoute[] }> {
   logger.info(`Scanning Next.js project directory: ${dirPath}`);
 
   // Detect Next.js project structure (app router and/or pages router)
@@ -70,17 +108,20 @@ async function scanNextjsProject(
     logger.info(`Using default Next.js port: ${configResult.port}`);
   }
 
-  const extensions = getNextjsFileExtensions();
-  logger.info(`Looking for files with extensions: ${extensions.join(", ")}`);
+  // Initialize app routes array
+  let appRoutes: NextjsAppRoute[] = [];
 
-  const files = await scanDirectory({
-    basePath: dirPath,
-    fileExtensions: extensions,
-    logger,
-  });
+  // If app router is detected, analyze it
+  if (structure.hasAppRouter && structure.appDirectory) {
+    logger.info(`Analyzing App Router directory: ${structure.appDirectory}`);
+    appRoutes = await analyzeAppRouter({
+      appDirectory: structure.appDirectory,
+      logger,
+    });
+    logger.info(`Found ${appRoutes.length} routes in App Router`);
+  }
 
-  logger.info(`Found ${files.length} files matching extensions`);
-  return { files, structure, port: configResult.port };
+  return { structure, port: configResult.port, appRoutes };
 }
 
 /**
@@ -105,25 +146,38 @@ export function nextjsRoutesCommand(): Command {
         const dirPath = options.path || ".";
 
         // Scan the Next.js project directory and detect structure and configuration
-        const { files, structure, port } = await scanNextjsProject(dirPath, logger);
+        const { structure, port, appRoutes } = await scanNextjsProject(dirPath, logger);
 
         // Use the detected port, unless overridden by command line option
         const resultPort = options.port ? Number(options.port) : port;
 
-        // TODO: Implement route parsing logic based on detected structure
+        // Build the base URL for the routes
+        const baseUrl = `http://localhost:${resultPort}`;
 
-        // Enhanced result including structure detection
+        // Convert app routes to route info objects
+        const routes: NextjsRouteInfo[] = appRoutes.map((route) =>
+          convertAppRouteToRouteInfo(route, baseUrl)
+        );
+
+        // Filter routes based on options
+        const filteredRoutes = filterRoutes(routes, {
+          filter: options.filter,
+          type: options.type,
+        });
+
+        // Create the result object
         const result = {
-          info: "Next.js routes analysis in development",
           scannedDirectory: dirPath,
-          port: resultPort,
-          filesFound: files.length,
+          baseUrl,
+          routesFound: filteredRoutes.length,
+          totalRoutesFound: routes.length,
           structure: {
             hasAppRouter: structure.hasAppRouter,
             hasPagesRouter: structure.hasPagesRouter,
             appDirectory: structure.appDirectory || null,
             pagesDirectory: structure.pagesDirectory || null,
           },
+          routes: filteredRoutes,
         };
 
         // Format the output
