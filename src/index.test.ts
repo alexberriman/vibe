@@ -25,6 +25,10 @@ vi.mock("./commands/storybook-urls/index.js", () => ({
   storybookUrlsCommand: vi.fn().mockReturnValue("mocked-storybook-urls-command"),
 }));
 
+vi.mock("./commands/server-run/index.js", () => ({
+  serverRunCommand: vi.fn().mockReturnValue("mocked-server-run-command"),
+}));
+
 describe("CLI", () => {
   it("should initialize correctly", async () => {
     // Reset process.argv for the test
@@ -49,8 +53,9 @@ describe("CLI", () => {
     expect(mockCommandInstance.version).toHaveBeenCalled();
     expect(mockCommandInstance.usage).toHaveBeenCalled();
 
-    // Verify that addCommand was called with the mock command
+    // Verify that addCommand was called with the mock commands
     expect(mockCommandInstance.addCommand).toHaveBeenCalledWith("mocked-storybook-urls-command");
+    expect(mockCommandInstance.addCommand).toHaveBeenCalledWith("mocked-server-run-command");
 
     // Verify that parse was called with process.argv
     expect(mockCommandInstance.parse).toHaveBeenCalledWith(process.argv);
