@@ -1,5 +1,4 @@
 import fs from "node:fs/promises";
-import type { Logger } from "pino";
 import { createLogger } from "../logger.js";
 import type {
   RouterDetector,
@@ -50,7 +49,7 @@ export abstract class BaseRouterDetector implements RouterDetector {
    * Determine the router type from file content
    * This will be overridden by concrete implementations to provide specific detection logic
    */
-  public abstract determineRouterType(filePath: string): Promise<RouterFileType>;
+  public abstract determineRouterType(_filePath: string): Promise<RouterFileType>;
 
   /**
    * Check if a file is a potential React Router definition file

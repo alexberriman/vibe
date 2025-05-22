@@ -56,7 +56,7 @@ function extractDataRouterDefinitions(content: string, logger: Logger): RouteInf
 /**
  * Extract routes defined using createRoute function
  */
-function extractCreateRoutePatterns(content: string, logger: Logger): RouteInfo[] {
+function extractCreateRoutePatterns(content: string, _logger: Logger): RouteInfo[] {
   const routes: RouteInfo[] = [];
 
   // Match patterns like: createRoute({ path: '/some-path', ... })
@@ -80,7 +80,7 @@ function extractCreateRoutePatterns(content: string, logger: Logger): RouteInfo[
 /**
  * Extract routes defined using defineRoutes function
  */
-function extractDefineRoutesPatterns(content: string, logger: Logger): RouteInfo[] {
+function extractDefineRoutesPatterns(content: string, _logger: Logger): RouteInfo[] {
   const routes: RouteInfo[] = [];
 
   // For tests, directly look for route calls if the content looks like it contains them
@@ -211,7 +211,7 @@ function extractChildRoutesFromOptions(options: string, parentPath: string): Rou
 /**
  * Extract routes defined using routeTree structure
  */
-function extractRouteTreePatterns(content: string, logger: Logger): RouteInfo[] {
+function extractRouteTreePatterns(content: string, _logger: Logger): RouteInfo[] {
   // For tests, if content directly looks like a route tree
   if (content.includes("path: ''") || content.includes("path: '/'")) {
     return parseRouteTreeObject(content, "");

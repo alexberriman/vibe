@@ -75,6 +75,83 @@ function extractTopLevelRoutes(content: string, logger: Logger): RouteInfo[] {
 }
 
 /**
+ * Extract child content from a route element
+ */
+function extractChildContent(routeElement: string): string {
+  return routeElement
+    .replace(/<Route\s+[^>]*?>/, "")
+    .replace(/<\/Route>$/, "")
+    .trim();
+}
+
+/**
+ * Process self-closing child route elements
+ */
+function processSelfClosingChildren(
+  selfClosingChildren: string[],
+  childParentPath: string
+): RouteInfo[] {
+  const childRoutes: RouteInfo[] = [];
+
+  for (const child of selfClosingChildren) {
+    const childRouteInfo = extractRouteAttributes(child, childParentPath);
+    if (childRouteInfo.path || childRouteInfo.index) {
+      childRoutes.push(childRouteInfo);
+    }
+  }
+
+  return childRoutes;
+}
+
+/**
+ * Process opening/closing child route elements
+ */
+function processOpeningClosingChildren(
+  openingChildren: string[],
+  childParentPath: string,
+  logger: Logger
+): RouteInfo[] {
+  const childRoutes: RouteInfo[] = [];
+
+  for (const child of openingChildren) {
+    const childRouteInfo = processRouteWithChildren(child, childParentPath, logger);
+    childRoutes.push(childRouteInfo);
+  }
+
+  return childRoutes;
+}
+
+/**
+ * Process child routes from content
+ */
+function processChildRoutes(
+  childContent: string,
+  routeInfo: RouteInfo,
+  parentPath: string,
+  logger: Logger
+): void {
+  const selfClosingChildren = childContent.match(/<Route\s+[^>]*?\/>/g) || [];
+  const openingChildren = childContent.match(/<Route\s+[^>]*?>[\s\S]*?<\/Route>/g) || [];
+
+  if (selfClosingChildren.length > 0 || openingChildren.length > 0) {
+    const childParentPath = routeInfo.path || parentPath;
+
+    const selfClosingRoutes = processSelfClosingChildren(selfClosingChildren, childParentPath);
+    const openingClosingRoutes = processOpeningClosingChildren(
+      openingChildren,
+      childParentPath,
+      logger
+    );
+
+    const allChildRoutes = [...selfClosingRoutes, ...openingClosingRoutes];
+
+    if (allChildRoutes.length > 0) {
+      routeInfo.children = allChildRoutes;
+    }
+  }
+}
+
+/**
  * Process a route element that may contain children
  */
 function processRouteWithChildren(
@@ -90,38 +167,10 @@ function processRouteWithChildren(
   const routeInfo = extractRouteAttributes(`<Route ${attributes}>`, parentPath);
 
   // Check for child routes
-  const childContent = routeElement
-    .replace(/<Route\s+[^>]*?>/, "")
-    .replace(/<\/Route>$/, "")
-    .trim();
+  const childContent = extractChildContent(routeElement);
 
   if (childContent) {
-    // Look for child Route elements
-    const selfClosingChildren = childContent.match(/<Route\s+[^>]*?\/>/g) || [];
-    const openingChildren = childContent.match(/<Route\s+[^>]*?>[\s\S]*?<\/Route>/g) || [];
-
-    if (selfClosingChildren.length > 0 || openingChildren.length > 0) {
-      const childRoutes: RouteInfo[] = [];
-      const childParentPath = routeInfo.path || parentPath;
-
-      // Process self-closing children
-      for (const child of selfClosingChildren) {
-        const childRouteInfo = extractRouteAttributes(child, childParentPath);
-        if (childRouteInfo.path || childRouteInfo.index) {
-          childRoutes.push(childRouteInfo);
-        }
-      }
-
-      // Process opening/closing children
-      for (const child of openingChildren) {
-        const childRouteInfo = processRouteWithChildren(child, childParentPath, logger);
-        childRoutes.push(childRouteInfo);
-      }
-
-      if (childRoutes.length > 0) {
-        routeInfo.children = childRoutes;
-      }
-    }
+    processChildRoutes(childContent, routeInfo, parentPath, logger);
   }
 
   return routeInfo;

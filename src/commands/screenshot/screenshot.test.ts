@@ -5,7 +5,7 @@ import * as childProcess from "node:child_process";
 // Mock child_process.spawn
 vi.mock("node:child_process", () => ({
   spawn: vi.fn().mockReturnValue({
-    on: vi.fn().mockImplementation((event, callback) => {
+    on: vi.fn().mockImplementation((event, _callback) => {
       if (event === "close") {
         // Don't actually call process.exit in tests
         // callback(0);
@@ -16,7 +16,7 @@ vi.mock("node:child_process", () => ({
 }));
 
 // Mock process.exit to prevent tests from exiting
-const exitMock = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
+const _exitMock = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
 
 describe("screenshotCommand", () => {
   beforeEach(() => {

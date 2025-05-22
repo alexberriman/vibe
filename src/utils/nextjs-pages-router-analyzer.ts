@@ -3,11 +3,7 @@ import fs from "node:fs/promises";
 import type { Logger } from "pino";
 import { createLogger } from "./logger.js";
 import { scanDirectory } from "./directory-scanner.js";
-import {
-  detectNextjsSpecialFile,
-  filterNextjsSpecialFiles,
-  type NextjsFileType,
-} from "./nextjs-special-file-detector.js";
+import { detectNextjsSpecialFile, type NextjsFileType } from "./nextjs-special-file-detector.js";
 
 /**
  * Represents a route in the Next.js Pages Router

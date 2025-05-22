@@ -168,6 +168,82 @@ function extractRouteObjects(routesContent: string): string[] {
 }
 
 /**
+ * Extract path from route object
+ */
+function extractPathFromRouteObject(routeObject: string): string {
+  const pathPatterns = [/path\s*:\s*["']([^"']*)["']/, /path\s*:\s*`([^`]*)`/];
+
+  for (const pattern of pathPatterns) {
+    const match = routeObject.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  return "";
+}
+
+/**
+ * Check if route is an index route
+ */
+function isIndexRoute(routeObject: string): boolean {
+  const indexMatch = routeObject.match(/index\s*:\s*(true|"true"|'true'|`true`|\{true\})/);
+  return Boolean(indexMatch);
+}
+
+/**
+ * Extract element from route object
+ */
+function extractElementFromRouteObject(routeObject: string): string | undefined {
+  const elementPatterns = [/element\s*:\s*<([^>]+)>/, /element\s*:\s*\{?<([^>]+)>\}?/];
+
+  for (const pattern of elementPatterns) {
+    const match = routeObject.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Extract children content from route object
+ */
+function extractChildrenContent(routeObject: string): string {
+  const childrenMatch = routeObject.match(/children\s*:\s*\[/);
+  if (!childrenMatch) {
+    return "";
+  }
+
+  const childrenStartIndex = routeObject.indexOf("[", childrenMatch.index);
+  let bracketCount = 1;
+  let childrenContent = "";
+  let i = childrenStartIndex + 1;
+
+  while (i < routeObject.length && bracketCount > 0) {
+    const char = routeObject[i];
+    if (char === "[") bracketCount++;
+    if (char === "]") bracketCount--;
+
+    if (bracketCount > 0) {
+      childrenContent += char;
+    }
+
+    i++;
+  }
+
+  return childrenContent;
+}
+
+/**
+ * Check if path has dynamic segments
+ */
+function hasDynamicSegments(path: string): boolean {
+  return path.includes(":") || path.includes("*");
+}
+
+/**
  * Parse a single route object and extract its properties
  */
 function parseRouteObject(
@@ -182,20 +258,11 @@ function parseRouteObject(
   };
 
   // Extract path property
-  const pathPatterns = [/path\s*:\s*["']([^"']*)["']/, /path\s*:\s*`([^`]*)`/];
-
-  for (const pattern of pathPatterns) {
-    const match = routeObject.match(pattern);
-    if (match && match[1]) {
-      routeInfo.path = match[1];
-      break;
-    }
-  }
+  routeInfo.path = extractPathFromRouteObject(routeObject);
 
   // If no path was found, check for index route
   if (!routeInfo.path) {
-    const indexMatch = routeObject.match(/index\s*:\s*(true|"true"|'true'|`true`|\{true\})/);
-    if (indexMatch) {
+    if (isIndexRoute(routeObject)) {
       routeInfo.index = true;
     } else {
       // Neither path nor index property was found
@@ -206,50 +273,20 @@ function parseRouteObject(
   // If path is specified, make sure it's properly formatted with parent path
   if (routeInfo.path) {
     routeInfo.path = combineRoutePaths(parentPath, routeInfo.path);
-
-    // Check for dynamic segments
-    if (routeInfo.path.includes(":") || routeInfo.path.includes("*")) {
-      routeInfo.hasDynamicSegments = true;
-    }
+    routeInfo.hasDynamicSegments = hasDynamicSegments(routeInfo.path);
   }
 
-  // Extract element property (simplified approach)
-  const elementPatterns = [/element\s*:\s*<([^>]+)>/, /element\s*:\s*\{?<([^>]+)>\}?/];
-
-  for (const pattern of elementPatterns) {
-    const match = routeObject.match(pattern);
-    if (match && match[1]) {
-      routeInfo.element = match[1];
-      break;
-    }
+  // Extract element property
+  const element = extractElementFromRouteObject(routeObject);
+  if (element) {
+    routeInfo.element = element;
   }
 
   // Check for children property
-  const childrenMatch = routeObject.match(/children\s*:\s*\[/);
-  if (childrenMatch) {
-    // Find the children array
-    const childrenStartIndex = routeObject.indexOf("[", childrenMatch.index);
-    let bracketCount = 1;
-    let childrenContent = "";
-    let i = childrenStartIndex + 1;
-
-    while (i < routeObject.length && bracketCount > 0) {
-      const char = routeObject[i];
-      if (char === "[") bracketCount++;
-      if (char === "]") bracketCount--;
-
-      if (bracketCount > 0) {
-        childrenContent += char;
-      }
-
-      i++;
-    }
-
-    // Parse children using recursive call
-    if (childrenContent) {
-      const childParentPath = routeInfo.path || parentPath;
-      routeInfo.children = parseRoutesArray(childrenContent, childParentPath, logger);
-    }
+  const childrenContent = extractChildrenContent(routeObject);
+  if (childrenContent) {
+    const childParentPath = routeInfo.path || parentPath;
+    routeInfo.children = parseRoutesArray(childrenContent, childParentPath, logger);
   }
 
   return routeInfo;

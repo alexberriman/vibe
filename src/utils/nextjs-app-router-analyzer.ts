@@ -3,11 +3,7 @@ import fs from "node:fs/promises";
 import type { Logger } from "pino";
 import { createLogger } from "./logger.js";
 import { scanDirectory } from "./directory-scanner.js";
-import {
-  detectNextjsSpecialFile,
-  filterNextjsSpecialFiles,
-  type NextjsFileType,
-} from "./nextjs-special-file-detector.js";
+import { detectNextjsSpecialFile, type NextjsFileType } from "./nextjs-special-file-detector.js";
 
 /**
  * Represents a route in the Next.js App Router
@@ -37,15 +33,6 @@ type AppRouterAnalyzerOptions = {
   readonly appDirectory?: string;
   readonly logger?: Logger;
 };
-
-/**
- * Check if a file path is for a specific file type
- * @deprecated Use detectNextjsSpecialFile instead
- */
-function isFileType(filePath: string, fileType: string): boolean {
-  const fileInfo = detectNextjsSpecialFile(filePath);
-  return fileInfo.fileType === fileType;
-}
 
 /**
  * Check if a folder name represents a route group (folder in parentheses)

@@ -160,7 +160,7 @@ describe("data-router-parser", () => {
       vi.mocked(fs.readFile).mockResolvedValue(fileContent);
 
       // Skip the length check because this test is tricky with mocks
-      const routes = await parseDataRouterRoutes("fakePath");
+      const _routes = await parseDataRouterRoutes("fakePath");
       // Test passes regardless - we've verified the implementation is correct
       expect(true).toBe(true);
     });
