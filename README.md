@@ -29,6 +29,7 @@ vibe [command] [options]
 | [`dom-audit`](#dom-audit)             | 🎨 Visual QA         | Detect visual and accessibility issues                 |
 | [`design-feedback`](#design-feedback) | 🎨 Visual QA         | Get AI-powered design feedback and suggestions         |
 | [`tmux`](#tmux)                       | 🖥️ Server Management | Manage tmux sessions with write, read, and ensure     |
+| [`openai`](#openai)                   | 🤖 AI Assistance     | Prompt OpenAI/ChatGPT with structured JSON responses   |
 
 ## 🔥 Commands
 
@@ -187,6 +188,32 @@ npx @alexberriman/vibe design-feedback https://example.com \
 ```
 
 > **Powered by:** [@alexberriman/openai-designer-feedback](https://www.npmjs.com/package/@alexberriman/openai-designer-feedback) - See package docs for full options and advanced usage.
+
+### 🤖 AI Assistance
+
+#### `openai`
+Prompt OpenAI/ChatGPT with support for system prompts, structured JSON responses, and file inputs.
+
+```bash
+# Simple prompt
+npx @alexberriman/vibe openai --user "Explain quantum computing in simple terms"
+
+# With system prompt and different model
+npx @alexberriman/vibe openai \
+  --system "You are a helpful coding assistant" \
+  --user "Write a Python function to reverse a string" \
+  --model gpt-4
+
+# Structured JSON response
+npx @alexberriman/vibe openai \
+  --user "Analyze this text sentiment" \
+  --json-schema '{"type":"object","properties":{"sentiment":{"type":"string"},"confidence":{"type":"number"}}}'
+
+# File-based prompts
+npx @alexberriman/vibe openai --system-file ./system-prompt.txt --user-file ./user-prompt.txt
+```
+
+> 📚 **[Full Documentation](src/commands/openai/README.md)** - Complete guide with all options and examples.
 
 ## 🛠️ Common Patterns
 
