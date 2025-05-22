@@ -161,6 +161,42 @@ export async function waitForPort({
 }
 
 /**
+ * Wait for a port to become unavailable (i.e., in use by a server)
+ */
+export async function waitForPortToBecomeUnavailable({
+  port,
+  host = "localhost",
+  timeout = 60000,
+  interval = 1000,
+  logger,
+}: CheckPortOptions & {
+  readonly timeout?: number;
+  readonly interval?: number;
+}): Promise<Result<boolean, Error>> {
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < timeout) {
+    const result = await isPortAvailable({ port, host, logger });
+
+    if (result.err) {
+      return result;
+    }
+
+    // If port is NOT available (i.e., in use), return success
+    if (!result.val) {
+      logger?.debug(`Port ${port} is now being used by a server`);
+      return Ok(true);
+    }
+
+    // Wait for the next check
+    await new Promise((resolve) => setTimeout(resolve, interval));
+  }
+
+  logger?.debug(`Timed out waiting for port ${port} to become unavailable`);
+  return Ok(false);
+}
+
+/**
  * Wait for a URL to become available
  */
 export async function waitForUrl({

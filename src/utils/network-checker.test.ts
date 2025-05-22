@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { isPortAvailable, isUrlAvailable, waitForPort, waitForUrl } from "./network-checker.js";
+import {
+  isPortAvailable,
+  isUrlAvailable,
+  waitForPort,
+  waitForPortToBecomeUnavailable,
+  waitForUrl,
+} from "./network-checker.js";
 import { createServer } from "node:net";
 import type { Server } from "node:net";
 // Ok is implied when checking result.ok, so we don't need to import it directly
@@ -171,6 +177,74 @@ describe("Network Checker", () => {
       // Since we're using a real port and not mocking isPortAvailable completely,
       // we'll just check the result is a boolean (true or false)
       expect(result.ok).toBe(true);
+    });
+  });
+
+  describe("waitForPortToBecomeUnavailable", () => {
+    let server: Server | null = null;
+
+    afterEach(() => {
+      if (server) {
+        server.close();
+        server = null;
+      }
+      vi.resetAllMocks();
+    });
+
+    it("should return true when port becomes unavailable", async () => {
+      const port = 37458;
+
+      // Start with port available, then make it unavailable after a short delay
+      setTimeout(() => {
+        server = createServer();
+        server.listen(port, "localhost");
+      }, 50);
+
+      const result = await waitForPortToBecomeUnavailable({
+        port,
+        timeout: 2000,
+        interval: 30,
+        logger: mockLogger as Logger,
+      });
+
+      expect(result.ok).toBe(true);
+      expect(result.val).toBe(true);
+    });
+
+    it("should return false when timeout is reached", async () => {
+      const result = await waitForPortToBecomeUnavailable({
+        port: 37459,
+        timeout: 100,
+        interval: 30,
+        logger: mockLogger as Logger,
+      });
+
+      expect(result.ok).toBe(true);
+      expect(result.val).toBe(false);
+    });
+
+    it("should immediately return true if port is already unavailable", async () => {
+      const port = 37460;
+
+      // Make port unavailable before calling the function
+      server = createServer();
+      await new Promise<void>((resolve) => {
+        if (server) {
+          server.listen(port, "localhost", () => {
+            resolve();
+          });
+        }
+      });
+
+      const result = await waitForPortToBecomeUnavailable({
+        port,
+        timeout: 1000,
+        interval: 100,
+        logger: mockLogger as Logger,
+      });
+
+      expect(result.ok).toBe(true);
+      expect(result.val).toBe(true);
     });
   });
 

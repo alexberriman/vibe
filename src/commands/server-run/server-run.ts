@@ -1,7 +1,11 @@
 import { Command } from "commander";
 import { createLogger } from "../../utils/logger.js";
 import { launchServer, parseEnvString, type ServerInstance } from "../../utils/server-launcher.js";
-import { isPortAvailable, waitForPort, waitForUrl } from "../../utils/network-checker.js";
+import {
+  isPortAvailable,
+  waitForPortToBecomeUnavailable,
+  waitForUrl,
+} from "../../utils/network-checker.js";
 import { runCommand } from "../../utils/command-runner.js";
 import { DEFAULT_ERROR_PATTERNS } from "../../utils/server-error-detector.js";
 import type { Logger } from "pino";
@@ -60,7 +64,7 @@ async function waitForServerUsingPort(
     process.exit(1);
   }
 
-  const waitPortResult = await waitForPort({
+  const waitPortResult = await waitForPortToBecomeUnavailable({
     port: options.port,
     timeout: options.timeout,
     interval: options.interval,
@@ -74,28 +78,6 @@ async function waitForServerUsingPort(
   }
 
   if (waitPortResult.val) {
-    // Port should become unavailable when server is listening
-    // Port is validated above, so it's safe to use here
-    const isAvailableResult = await isPortAvailable({
-      port: options.port,
-      logger,
-    });
-
-    if (isAvailableResult.err) {
-      logger.error(`Error checking port: ${isAvailableResult.val.message}`);
-      await server.kill();
-      process.exit(1);
-    }
-
-    if (isAvailableResult.val) {
-      // If the port is still available, something went wrong
-      logger.error(
-        `Port ${options.port} is still available, server may not have started properly.`
-      );
-      await server.kill();
-      process.exit(1);
-    }
-
     logger.info(`Port ${options.port} is now being used by the server.`);
 
     // Mark the server as successfully started
