@@ -48,7 +48,7 @@ export class ObjectRouterDetector extends BaseRouterDetector {
       }
 
       return "unknown";
-    } catch (error) {
+    } catch {
       return "unknown";
     }
   }

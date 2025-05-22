@@ -39,7 +39,7 @@ async function directoryExists(dirPath: string): Promise<boolean> {
   try {
     const stats = await fs.stat(dirPath);
     return stats.isDirectory();
-  } catch (error) {
+  } catch {
     return false;
   }
 }

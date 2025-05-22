@@ -26,7 +26,7 @@ export abstract class BaseRouterDetector implements RouterDetector {
     try {
       const content = await fs.readFile(filePath, "utf8");
       return this.routerImportPatterns.some((pattern) => content.includes(pattern));
-    } catch (error) {
+    } catch {
       // File can't be read or doesn't exist
       return false;
     }
@@ -39,7 +39,7 @@ export abstract class BaseRouterDetector implements RouterDetector {
     try {
       const content = await fs.readFile(filePath, "utf8");
       return this.routerComponentPatterns.some((pattern) => content.includes(pattern));
-    } catch (error) {
+    } catch {
       // File can't be read or doesn't exist
       return false;
     }

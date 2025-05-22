@@ -38,7 +38,7 @@ export class DataRouterDetector extends BaseRouterDetector {
       }
 
       return "unknown";
-    } catch (error) {
+    } catch {
       return "unknown";
     }
   }

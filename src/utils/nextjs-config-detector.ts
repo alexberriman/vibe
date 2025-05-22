@@ -21,7 +21,7 @@ async function fileExists(filePath: string): Promise<boolean> {
   try {
     const stats = await fs.stat(filePath);
     return stats.isFile();
-  } catch (error) {
+  } catch {
     return false;
   }
 }

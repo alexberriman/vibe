@@ -42,7 +42,7 @@ export class JSXRouterDetector extends BaseRouterDetector {
       }
 
       return "unknown";
-    } catch (error) {
+    } catch {
       return "unknown";
     }
   }
