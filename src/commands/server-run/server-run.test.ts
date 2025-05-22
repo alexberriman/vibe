@@ -56,6 +56,8 @@ describe("serverRunCommand", () => {
     expect(optionNames).toContain("--env");
     expect(optionNames).toContain("--interval");
     expect(optionNames).toContain("--stall-timeout");
+    expect(optionNames).toContain("--error-message");
+    expect(optionNames).toContain("--success-message");
   });
 
   it("should have correct default values", () => {
@@ -85,5 +87,24 @@ describe("serverRunCommand", () => {
     // Find keep-alive option and check default
     const keepAliveOption = options.find((opt) => opt.long === "--keep-alive");
     expect(keepAliveOption?.defaultValue).toBe(false);
+  });
+
+  it("should have the new error-message and success-message options", () => {
+    const command = serverRunCommand();
+    const options = command.options;
+
+    // Find error-message option
+    const errorMessageOption = options.find((opt) => opt.long === "--error-message");
+    expect(errorMessageOption).toBeDefined();
+    expect(errorMessageOption?.description).toBe(
+      "Custom error message to display when run-command fails"
+    );
+
+    // Find success-message option
+    const successMessageOption = options.find((opt) => opt.long === "--success-message");
+    expect(successMessageOption).toBeDefined();
+    expect(successMessageOption?.description).toBe(
+      "Custom success message to display when run-command succeeds"
+    );
   });
 });

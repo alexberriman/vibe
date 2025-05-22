@@ -22,6 +22,8 @@ type ServerRunOptions = {
   readonly env?: string;
   readonly interval?: number;
   readonly stallTimeout?: number;
+  readonly errorMessage?: string;
+  readonly successMessage?: string;
 };
 
 /**
@@ -205,11 +207,17 @@ async function runCommandAgainstServer(
   }
 
   if (result.exitCode !== 0) {
-    logger.error(`Command failed with exit code ${result.exitCode}`);
+    if (options.errorMessage) {
+      console.error(options.errorMessage);
+    } else {
+      logger.error(`Command failed with exit code ${result.exitCode}`);
+    }
     if (!options.keepAlive) {
       await server.kill();
     }
     process.exit(result.exitCode);
+  } else if (options.successMessage) {
+    console.log(options.successMessage);
   }
 }
 
@@ -251,6 +259,11 @@ export function serverRunCommand(): Command {
     .option(
       "-e, --env <env>",
       "Environment variables to pass to the server (format: KEY1=value1,KEY2=value2)"
+    )
+    .option("--error-message <message>", "Custom error message to display when run-command fails")
+    .option(
+      "--success-message <message>",
+      "Custom success message to display when run-command succeeds"
     )
     .action(async (options: ServerRunOptions) => {
       // Create logger with appropriate verbosity

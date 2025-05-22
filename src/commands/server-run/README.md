@@ -22,6 +22,8 @@ vibe server-run [options]
 | `--keep-alive` | `-k` | Keep server running after command execution | `false` |
 | `--run-command <command>` | `-r` | Command to run against the server once it's ready | - |
 | `--env <env>` | `-e` | Environment variables to pass to the server (format: KEY1=value1,KEY2=value2) | - |
+| `--error-message <message>` | - | Custom error message to display when run-command fails | - |
+| `--success-message <message>` | - | Custom success message to display when run-command succeeds | - |
 
 ## Examples
 
@@ -49,6 +51,14 @@ vibe server-run --command "npm run dev" --timeout 120000 --interval 2000
 vibe server-run --command "npm run dev" --env "NODE_ENV=production,DEBUG=true" --keep-alive
 ```
 
+### Run tests with custom error and success messages
+
+```bash
+vibe server-run --command "npm run dev" --url "http://localhost:3000" --run-command "npm run test:e2e" \
+  --error-message "❌ E2E tests failed! Run 'npm run test:e2e:debug' to debug failing tests." \
+  --success-message "✅ All E2E tests passed successfully!"
+```
+
 ## Features
 
 - Start any server with a configurable command
@@ -61,6 +71,7 @@ vibe server-run --command "npm run dev" --env "NODE_ENV=production,DEBUG=true" -
 - Detailed logging with different verbosity levels
 - Support for environment variable passing
 - Option to keep the server running after command completion
+- Custom error and success messages for run-command execution
 
 ## Implementation
 

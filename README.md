@@ -105,6 +105,14 @@ npx @alexberriman/vibe server-run \
   --url "http://localhost:8080/health" \
   --env "NODE_ENV=test,PORT=8080" \
   --keep-alive
+
+# With custom error and success messages
+npx @alexberriman/vibe server-run \
+  --command "npm run dev" \
+  --port 3000 \
+  --run-command "npm run test:e2e" \
+  --error-message "❌ Tests failed! Run 'npm run test:e2e:debug' for details." \
+  --success-message "✅ All tests passed!"
 ```
 
 > 📚 **[Full Documentation](src/commands/server-run/README.md)** - Complete guide with all options and examples.
