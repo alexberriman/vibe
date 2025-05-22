@@ -36,8 +36,6 @@ vibe [command] [options]
 #### `storybook-urls`
 Generate JSON arrays of Storybook story URLs for automated testing and quality assurance.
 
-> 📚 **[Full Documentation](src/commands/storybook-urls/README.md)** - Complete guide with all options and examples.
-
 ```bash
 # Scan current directory for stories
 npx @alexberriman/vibe storybook-urls
@@ -52,10 +50,10 @@ npx @alexberriman/vibe storybook-urls --frame-url --filter "Button*"
 npx @alexberriman/vibe storybook-urls --output stories.json --pretty
 ```
 
+> 📚 **[Full Documentation](src/commands/storybook-urls/README.md)** - Complete guide with all options and examples.
+
 #### `react-routes`
 Discover all routes in your React application and generate testable URLs.
-
-> 📚 **[Full Documentation](src/commands/react-routes/README.md)** - Complete guide with all options and examples.
 
 ```bash
 # Scan React app routes
@@ -68,10 +66,10 @@ npx @alexberriman/vibe react-routes --port 5173 --output routes.json
 npx @alexberriman/vibe react-routes --filter "/admin*" --pretty
 ```
 
+> 📚 **[Full Documentation](src/commands/react-routes/README.md)** - Complete guide with all options and examples.
+
 #### `nextjs-routes`
 Analyze Next.js applications and extract both page and API routes.
-
-> 📚 **[Full Documentation](src/commands/nextjs-routes/README.md)** - Complete guide with all options and examples.
 
 ```bash
 # Scan all Next.js routes
@@ -85,12 +83,12 @@ npx @alexberriman/vibe nextjs-routes --type api
 npx @alexberriman/vibe nextjs-routes --port 3000 --pretty
 ```
 
+> 📚 **[Full Documentation](src/commands/nextjs-routes/README.md)** - Complete guide with all options and examples.
+
 ### 🖥️ Server Management
 
 #### `server-run`
 Orchestrate server lifecycle: start, wait for readiness, execute commands, and cleanup.
-
-> 📚 **[Full Documentation](src/commands/server-run/README.md)** - Complete guide with all options and examples.
 
 ```bash
 # Start server and run tests
@@ -107,13 +105,12 @@ npx @alexberriman/vibe server-run \
   --keep-alive
 ```
 
+> 📚 **[Full Documentation](src/commands/server-run/README.md)** - Complete guide with all options and examples.
+
 ### 🎨 Visual Quality Assurance
 
 #### `screenshot`
-
 Capture high-quality screenshots of web pages with device emulation.
-
-> **Powered by:** [@alexberriman/screenshotter](https://www.npmjs.com/package/@alexberriman/screenshotter) - See package docs for full options and advanced usage.
 
 ```bash
 # Basic screenshot
@@ -131,11 +128,10 @@ npx @alexberriman/vibe screenshot https://example.com \
   --wait-for "#main-content"
 ```
 
+> **Powered by:** [@alexberriman/screenshotter](https://www.npmjs.com/package/@alexberriman/screenshotter) - See package docs for full options and advanced usage.
+
 #### `dom-audit`
-
 Detect visual and accessibility issues in your web applications.
-
-> **Powered by:** [@alexberriman/visual-dom-auditor](https://www.npmjs.com/package/@alexberriman/visual-dom-auditor) - See package docs for full options and advanced usage.
 
 ```bash
 # Basic audit
@@ -151,11 +147,10 @@ npx @alexberriman/vibe dom-audit \
 npx @alexberriman/vibe dom-audit --url https://example.com --viewport 1366x768
 ```
 
+> **Powered by:** [@alexberriman/visual-dom-auditor](https://www.npmjs.com/package/@alexberriman/visual-dom-auditor) - See package docs for full options and advanced usage.
+
 #### `design-feedback`
-
 Get AI-powered design feedback and suggestions for UI screenshots.
-
-> **Powered by:** [@alexberriman/openai-designer-feedback](https://www.npmjs.com/package/@alexberriman/openai-designer-feedback) - See package docs for full options and advanced usage.
 
 ```bash
 # Basic analysis
@@ -170,6 +165,8 @@ npx @alexberriman/vibe design-feedback https://example.com \
   --output screenshot.png \
   --format json
 ```
+
+> **Powered by:** [@alexberriman/openai-designer-feedback](https://www.npmjs.com/package/@alexberriman/openai-designer-feedback) - See package docs for full options and advanced usage.
 
 ## 🛠️ Common Patterns
 
