@@ -63,13 +63,21 @@ export abstract class BaseStoryParser implements StoryParser {
   }
 
   /**
-   * Generate a story ID from component name and story name
+   * Generate a story ID from component name and story name, optionally including title
    */
-  protected generateStoryId(componentName: string, storyName: string): string {
-    const sanitizedComponentName = componentName.toLowerCase().replace(/[^a-z0-9]/g, "-");
+  protected generateStoryId(componentName: string, storyName: string, title?: string): string {
     const sanitizedStoryName = storyName.toLowerCase().replace(/[^a-z0-9]/g, "-");
 
-    return `${sanitizedComponentName}--${sanitizedStoryName}`;
+    // If title is provided, use it as the base, otherwise use componentName
+    let baseId: string;
+    if (title) {
+      // Convert title like "Forms/Radio" to "forms-radio"
+      baseId = title.toLowerCase().replace(/[^a-z0-9]/g, "-");
+    } else {
+      baseId = componentName.toLowerCase().replace(/[^a-z0-9]/g, "-");
+    }
+
+    return `${baseId}--${sanitizedStoryName}`;
   }
 
   /**

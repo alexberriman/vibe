@@ -39,7 +39,7 @@ describe("TypeScriptStoryParser", () => {
     expect(stories).toHaveLength(3);
     expect(stories[0].name).toBe("Primary");
     expect(stories[0].componentName).toBe("Button");
-    expect(stories[0].id).toBe("button--primary");
+    expect(stories[0].id).toBe("components-button--primary");
     expect(stories[0].title).toBe("Components/Button");
 
     expect(stories[1].name).toBe("Secondary");
@@ -134,5 +134,67 @@ describe("TypeScriptStoryParser", () => {
 
     // Should log the error
     expect(mockLogger.error).toHaveBeenCalled();
+  });
+
+  it("should handle stories without title and fallback to component name", async () => {
+    const mockFileContent = `
+      import React from "react";
+      import { Button } from "./button";
+      
+      export default {
+        component: Button,
+      };
+      
+      export const Primary = () => <Button>Primary</Button>;
+      export const Secondary = () => <Button variant="secondary">Secondary</Button>;
+    `;
+
+    vi.spyOn(fs, "readFile").mockResolvedValue(mockFileContent);
+
+    const parser = new TypeScriptStoryParser({
+      filePath: "/path/to/Button.stories.tsx",
+      logger: { error: vi.fn() } as unknown as import("pino").Logger,
+    });
+
+    const stories = await parser.parse();
+
+    expect(stories).toHaveLength(2);
+    expect(stories[0].name).toBe("Primary");
+    expect(stories[0].componentName).toBe("Button");
+    expect(stories[0].id).toBe("button--primary"); // Should fallback to component name
+    expect(stories[0].title).toBe(""); // No title
+  });
+
+  it("should handle nested story categories correctly", async () => {
+    const mockFileContent = `
+      import React from "react";
+      import { Radio } from "./radio";
+      
+      export default {
+        title: "Forms/Radio",
+        component: Radio,
+      };
+      
+      export const Default = () => <Radio>Default</Radio>;
+      export const Checked = () => <Radio checked>Checked</Radio>;
+    `;
+
+    vi.spyOn(fs, "readFile").mockResolvedValue(mockFileContent);
+
+    const parser = new TypeScriptStoryParser({
+      filePath: "/path/to/Radio.stories.tsx",
+      logger: { error: vi.fn() } as unknown as import("pino").Logger,
+    });
+
+    const stories = await parser.parse();
+
+    expect(stories).toHaveLength(2);
+    expect(stories[0].name).toBe("Default");
+    expect(stories[0].componentName).toBe("Radio");
+    expect(stories[0].id).toBe("forms-radio--default");
+    expect(stories[0].title).toBe("Forms/Radio");
+
+    expect(stories[1].name).toBe("Checked");
+    expect(stories[1].id).toBe("forms-radio--checked");
   });
 });

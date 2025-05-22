@@ -43,7 +43,7 @@ export class JavaScriptStoryParser extends BaseStoryParser {
         const formattedName = this.formatStoryName(storyName);
 
         stories.push({
-          id: this.generateStoryId(componentName, formattedName),
+          id: this.generateStoryId(componentName, formattedName, metaTitle),
           name: formattedName,
           componentName,
           displayName,
@@ -55,7 +55,7 @@ export class JavaScriptStoryParser extends BaseStoryParser {
       // If no stories were found but it's a story file, create a default one
       if (stories.length === 0) {
         stories.push({
-          id: this.generateStoryId(componentName, "primary"),
+          id: this.generateStoryId(componentName, "primary", metaTitle),
           name: "Primary",
           componentName,
           displayName,
