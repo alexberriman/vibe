@@ -25,7 +25,7 @@ Create a CLI tool that analyzes a Next.js app directory and generates a JSON arr
 - [✅] Add support for API routes detection (app/api and pages/api)
 - [✅] Develop metadata extraction from route files where possible
 - [✅] Implement URL generator with correct base URL and paths
-- [ ] Add support for Next.js middleware and rewrites detection if present
+- [✅] Add support for Next.js middleware and rewrites detection if present
 - [✅] Build JSON output formatter with route details
 - [✅] Implement pretty-print option for formatted output
 - [✅] Add option to save output to file (default: print to console)
