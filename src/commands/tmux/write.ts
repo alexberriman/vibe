@@ -151,6 +151,7 @@ export const writeSubcommand = (): Command => {
   const command = new Command("write");
 
   command.description("Send input to a tmux session");
+  command.argument("[text]", "Text to send to the tmux session");
   command.option("-t, --target <target>", "Target session[:window[:pane]]");
   command.option("-s, --session <session>", "Session name");
   command.option("-w, --window <window>", "Window name/number");
@@ -160,10 +161,7 @@ export const writeSubcommand = (): Command => {
   command.option("-d, --delay <ms>", "Delay between chunks in milliseconds", parseInt);
   command.option("-v, --verbose", "Verbose output");
 
-  command.action(async (options: WriteOptions, cmd) => {
-    // Get text from arguments
-    const text = cmd.args?.[0] || "";
-
+  command.action(async (text: string, options: WriteOptions) => {
     if (!text && !options.keys) {
       console.error("Error: Must provide text to send or --keys option");
       process.exit(1);
