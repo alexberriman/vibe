@@ -2,21 +2,9 @@
 
 # Vibe ⚡
 
-CLI tools to enhance your development workflow with intelligent route discovery, automated testing, and visual quality assurance.
+A collection of CLI tools to enhance my development workflow.
 
 </div>
-
-## 📋 Commands
-
-| Command | Category | Description |
-|---------|----------|-------------|
-| [`storybook-urls`](#storybook-urls) | 📱 Route Discovery | Generate JSON arrays of Storybook story URLs |
-| [`react-routes`](#react-routes) | 📱 Route Discovery | Discover all routes in React applications |
-| [`nextjs-routes`](#nextjs-routes) | 📱 Route Discovery | Analyze Next.js apps and extract page/API routes |
-| [`server-run`](#server-run) | 🖥️ Server Management | Orchestrate server lifecycle with automated testing |
-| [`screenshot`](#screenshot) | 🎨 Visual QA | Capture high-quality screenshots with device emulation |
-| [`dom-audit`](#dom-audit) | 🎨 Visual QA | Detect visual and accessibility issues |
-| [`design-feedback`](#design-feedback) | 🎨 Visual QA | Get AI-powered design feedback and suggestions |
 
 ## 🚀 Quick Start
 
@@ -29,12 +17,26 @@ npm install -g @alexberriman/vibe
 vibe [command] [options]
 ```
 
+## 📋 Commands
+
+| Command                               | Category             | Description                                            |
+| ------------------------------------- | -------------------- | ------------------------------------------------------ |
+| [`storybook-urls`](#storybook-urls)   | 📱 Route Discovery   | Generate JSON arrays of Storybook story URLs           |
+| [`react-routes`](#react-routes)       | 📱 Route Discovery   | Discover all routes in React applications              |
+| [`nextjs-routes`](#nextjs-routes)     | 📱 Route Discovery   | Analyze Next.js apps and extract page/API routes       |
+| [`server-run`](#server-run)           | 🖥️ Server Management | Orchestrate server lifecycle with automated testing    |
+| [`screenshot`](#screenshot)           | 🎨 Visual QA         | Capture high-quality screenshots with device emulation |
+| [`dom-audit`](#dom-audit)             | 🎨 Visual QA         | Detect visual and accessibility issues                 |
+| [`design-feedback`](#design-feedback) | 🎨 Visual QA         | Get AI-powered design feedback and suggestions         |
+
 ## 🔥 Commands
 
 ### 📱 Route Discovery
 
 #### `storybook-urls`
 Generate JSON arrays of Storybook story URLs for automated testing and quality assurance.
+
+> 📚 **[Full Documentation](src/commands/storybook-urls/README.md)** - Complete guide with all options and examples.
 
 ```bash
 # Scan current directory for stories
@@ -53,6 +55,8 @@ npx @alexberriman/vibe storybook-urls --output stories.json --pretty
 #### `react-routes`
 Discover all routes in your React application and generate testable URLs.
 
+> 📚 **[Full Documentation](src/commands/react-routes/README.md)** - Complete guide with all options and examples.
+
 ```bash
 # Scan React app routes
 npx @alexberriman/vibe react-routes
@@ -66,6 +70,8 @@ npx @alexberriman/vibe react-routes --filter "/admin*" --pretty
 
 #### `nextjs-routes`
 Analyze Next.js applications and extract both page and API routes.
+
+> 📚 **[Full Documentation](src/commands/nextjs-routes/README.md)** - Complete guide with all options and examples.
 
 ```bash
 # Scan all Next.js routes
@@ -83,6 +89,8 @@ npx @alexberriman/vibe nextjs-routes --port 3000 --pretty
 
 #### `server-run`
 Orchestrate server lifecycle: start, wait for readiness, execute commands, and cleanup.
+
+> 📚 **[Full Documentation](src/commands/server-run/README.md)** - Complete guide with all options and examples.
 
 ```bash
 # Start server and run tests
@@ -102,7 +110,10 @@ npx @alexberriman/vibe server-run \
 ### 🎨 Visual Quality Assurance
 
 #### `screenshot`
+
 Capture high-quality screenshots of web pages with device emulation.
+
+> **Powered by:** [@alexberriman/screenshotter](https://www.npmjs.com/package/@alexberriman/screenshotter) - See package docs for full options and advanced usage.
 
 ```bash
 # Basic screenshot
@@ -121,7 +132,10 @@ npx @alexberriman/vibe screenshot https://example.com \
 ```
 
 #### `dom-audit`
+
 Detect visual and accessibility issues in your web applications.
+
+> **Powered by:** [@alexberriman/visual-dom-auditor](https://www.npmjs.com/package/@alexberriman/visual-dom-auditor) - See package docs for full options and advanced usage.
 
 ```bash
 # Basic audit
@@ -138,7 +152,10 @@ npx @alexberriman/vibe dom-audit --url https://example.com --viewport 1366x768
 ```
 
 #### `design-feedback`
+
 Get AI-powered design feedback and suggestions for UI screenshots.
+
+> **Powered by:** [@alexberriman/openai-designer-feedback](https://www.npmjs.com/package/@alexberriman/openai-designer-feedback) - See package docs for full options and advanced usage.
 
 ```bash
 # Basic analysis
@@ -157,19 +174,21 @@ npx @alexberriman/vibe design-feedback https://example.com \
 ## 🛠️ Common Patterns
 
 ### Testing Workflow
+
 ```bash
 # 1. Start your app server
 npx @alexberriman/vibe server-run --command "npm run dev" --port 3000 --run-command "
   # 2. Generate all testable URLs
   npx @alexberriman/vibe react-routes --output routes.json &&
   npx @alexberriman/vibe storybook-urls --output stories.json &&
-  
+
   # 3. Run visual tests
   npx @alexberriman/vibe dom-audit --url-list routes.json
 "
 ```
 
 ### Quality Assurance Pipeline
+
 ```bash
 # Generate routes and audit them
 npx @alexberriman/vibe nextjs-routes --pretty > routes.json
@@ -191,15 +210,9 @@ done
 ## 📋 Global Options
 
 Most commands support these common options:
+
 - `--output <file>` (`-o`): Save output to file
 - `--pretty`: Pretty print JSON output
 - `--filter <pattern>` (`-f`): Filter results by pattern
 - `--help`: Show command-specific help
 
-## 🤝 Contributing
-
-Feel free to suggest improvements or report issues through Pull Requests.
-
-## 📄 License
-
-MIT
