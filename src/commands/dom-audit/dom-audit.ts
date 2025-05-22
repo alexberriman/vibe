@@ -13,15 +13,29 @@ export function domAuditCommand(): Command {
 
   command
     .description("Run visual DOM audits on web pages using @alexberriman/visual-dom-auditor")
-    .usage("[options] -- [passthrough args]")
-    .option("--help", "Show help for dom-audit command")
     .allowUnknownOption()
-    .action(async (options: DomAuditOptions, command) => {
-      // Get all arguments passed to the command
-      const args = command.args || [];
+    .allowExcessArguments(true)
+    .action(async (options, cmd) => {
+      // Get all parsed arguments and options
+      const args = cmd.args || [];
+      const opts = cmd.opts();
+
+      // Convert options back to command line arguments
+      const optionArgs: string[] = [];
+      for (const [key, value] of Object.entries(opts)) {
+        if (value !== undefined) {
+          optionArgs.push(`--${key}`);
+          if (value !== true) {
+            optionArgs.push(String(value));
+          }
+        }
+      }
+
+      // Combine options and positional arguments
+      const allArgs = [...optionArgs, ...args];
 
       // Run the underlying package with all arguments passed through
-      const child = spawn("npx", ["@alexberriman/visual-dom-auditor", ...args], {
+      const child = spawn("npx", ["@alexberriman/visual-dom-auditor", ...allArgs], {
         stdio: "inherit", // Inherit stdio to show output in the terminal
         shell: true,
       });

@@ -13,15 +13,29 @@ export function designFeedbackCommand(): Command {
 
   command
     .description("Get AI-powered design feedback using @alexberriman/openai-designer-feedback")
-    .usage("[options] -- [passthrough args]")
-    .option("--help", "Show help for design-feedback command")
     .allowUnknownOption()
-    .action(async (options: DesignFeedbackOptions, command) => {
-      // Get all arguments passed to the command
-      const args = command.args || [];
+    .allowExcessArguments(true)
+    .action(async (options, cmd) => {
+      // Get all parsed arguments and options
+      const args = cmd.args || [];
+      const opts = cmd.opts();
+
+      // Convert options back to command line arguments
+      const optionArgs: string[] = [];
+      for (const [key, value] of Object.entries(opts)) {
+        if (value !== undefined) {
+          optionArgs.push(`--${key}`);
+          if (value !== true) {
+            optionArgs.push(String(value));
+          }
+        }
+      }
+
+      // Combine options and positional arguments
+      const allArgs = [...optionArgs, ...args];
 
       // Run the underlying package with all arguments passed through
-      const child = spawn("npx", ["@alexberriman/openai-designer-feedback", ...args], {
+      const child = spawn("npx", ["@alexberriman/openai-designer-feedback", ...allArgs], {
         stdio: "inherit", // Inherit stdio to show output in the terminal
         shell: true,
       });
