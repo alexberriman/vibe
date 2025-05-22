@@ -90,42 +90,52 @@ Capture high-quality screenshots of web pages with device emulation.
 
 ```bash
 # Basic screenshot
-npx @alexberriman/vibe screenshot --url https://example.com
+npx @alexberriman/vibe screenshot https://example.com
 
-# Full page screenshot with specific device
-npx @alexberriman/vibe screenshot \
-  --url https://example.com \
-  --fullpage \
-  --device "iPhone 12"
+# Custom output and mobile viewport
+npx @alexberriman/vibe screenshot https://example.com -o ./screenshots/homepage.png -v mobile
+
+# Advanced screenshot with multiple options
+npx @alexberriman/vibe screenshot https://example.com \
+  -v tablet \
+  --format jpeg \
+  --quality 85 \
+  -w 2 \
+  --wait-for "#main-content"
 ```
 
 #### `dom-audit`
 Detect visual and accessibility issues in your web applications.
 
 ```bash
-# Audit a webpage
+# Basic audit
 npx @alexberriman/vibe dom-audit --url https://example.com
 
-# Headless mode with custom output
+# Mobile viewport with custom output
 npx @alexberriman/vibe dom-audit \
   --url https://example.com \
-  --headless \
-  --format json \
-  --output audit-report.json
+  --viewport mobile \
+  --save ./reports/audit.json
+
+# Custom viewport size
+npx @alexberriman/vibe dom-audit --url https://example.com --viewport 1366x768
 ```
 
 #### `design-feedback`
 Get AI-powered design feedback and suggestions for UI screenshots.
 
 ```bash
-# Analyze a screenshot
-npx @alexberriman/vibe design-feedback --image ./screenshot.png
+# Basic analysis
+npx @alexberriman/vibe design-feedback https://example.com
 
-# Custom prompt and model
-npx @alexberriman/vibe design-feedback \
-  --image ./design.png \
-  --prompt "Focus on accessibility and mobile usability" \
-  --model 4
+# Mobile viewport analysis
+npx @alexberriman/vibe design-feedback https://example.com --viewport mobile
+
+# Custom viewport with JSON output
+npx @alexberriman/vibe design-feedback https://example.com \
+  --viewport 1024x768 \
+  --output screenshot.png \
+  --format json
 ```
 
 ## 🛠️ Common Patterns
@@ -148,7 +158,7 @@ npx @alexberriman/vibe server-run --command "npm run dev" --port 3000 --run-comm
 # Generate routes and audit them
 npx @alexberriman/vibe nextjs-routes --pretty > routes.json
 cat routes.json | jq -r '.[]' | while read url; do
-  npx @alexberriman/vibe screenshot --url "$url" --output "screenshots/$(basename $url).png"
+  npx @alexberriman/vibe screenshot "$url" -o "screenshots/$(basename $url).png"
   npx @alexberriman/vibe dom-audit --url "$url"
 done
 ```
