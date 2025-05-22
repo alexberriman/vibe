@@ -28,6 +28,7 @@ vibe [command] [options]
 | [`screenshot`](#screenshot)           | 🎨 Visual QA         | Capture high-quality screenshots with device emulation |
 | [`dom-audit`](#dom-audit)             | 🎨 Visual QA         | Detect visual and accessibility issues                 |
 | [`design-feedback`](#design-feedback) | 🎨 Visual QA         | Get AI-powered design feedback and suggestions         |
+| [`tmux`](#tmux)                       | 🖥️ Server Management | Manage tmux sessions with write, read, and ensure     |
 
 ## 🔥 Commands
 
@@ -106,6 +107,25 @@ npx @alexberriman/vibe server-run \
 ```
 
 > 📚 **[Full Documentation](src/commands/server-run/README.md)** - Complete guide with all options and examples.
+
+#### `tmux`
+Powerful tmux session management with three subcommands: write, read, and ensure.
+
+```bash
+# Send text to tmux session
+npx @alexberriman/vibe tmux write "npm start" --session dev
+
+# Send special keys
+npx @alexberriman/vibe tmux write --keys "ctrl-c,enter" --session dev
+
+# Read session content
+npx @alexberriman/vibe tmux read --session dev --lines 100
+
+# Ensure session exists (idempotent)
+npx @alexberriman/vibe tmux ensure dev --directory ~/project --command "npm run dev"
+```
+
+> 📚 **[Full Documentation](src/commands/tmux/README.md)** - Complete guide with all subcommands and examples.
 
 ### 🎨 Visual Quality Assurance
 

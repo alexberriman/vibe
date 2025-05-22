@@ -8,6 +8,7 @@ import { nextjsRoutesCommand } from "./commands/nextjs-routes/index.js";
 import { domAuditCommand } from "./commands/dom-audit/index.js";
 import { screenshotCommand } from "./commands/screenshot/index.js";
 import { designFeedbackCommand } from "./commands/design-feedback/index.js";
+import { tmuxCommand } from "./commands/tmux/index.js";
 
 // Create the main CLI program
 const program = new Command();
@@ -27,6 +28,7 @@ program.addCommand(nextjsRoutesCommand());
 program.addCommand(domAuditCommand());
 program.addCommand(screenshotCommand());
 program.addCommand(designFeedbackCommand());
+program.addCommand(tmuxCommand());
 
 // Parse arguments and execute the matching command
 program.parse(process.argv);

@@ -35,56 +35,56 @@ Create a CLI tool that analyzes a Next.js app directory and generates a JSON arr
 
 ---
 
-## tmux command
+## ✅ tmux command
 
 Create a CLI tool with subcommands for tmux session management (write, read, ensure).
 
 ### Core Functionality
 
-- [ ] Set up the command structure (`commands/tmux/`)
-- [ ] Implement main tmux command with subcommand routing using Commander.js
-- [ ] Create shared tmux utilities for session validation and error handling
+- [✅] Set up the command structure (`commands/tmux/`)
+- [✅] Implement main tmux command with subcommand routing using Commander.js
+- [✅] Create shared tmux utilities for session validation and error handling
 
 #### tmux write subcommand
 
 Send input to a tmux session with support for chunked large strings and specific keystrokes.
 
-- [ ] Implement tmux write subcommand CLI argument handling
-- [ ] Create tmux session detection and validation
-- [ ] Implement string chunking for large input blocks
-- [ ] Add support for sending specific keystrokes (Enter, Ctrl+C, etc.)
-- [ ] Create timing/delay functionality for waiting between sends
-- [ ] Build input sanitization to handle special characters
-- [ ] Add session target specification (session name or window:pane)
+- [✅] Implement tmux write subcommand CLI argument handling
+- [✅] Create tmux session detection and validation
+- [✅] Implement string chunking for large input blocks
+- [✅] Add support for sending specific keystrokes (Enter, Ctrl+C, etc.)
+- [✅] Create timing/delay functionality for waiting between sends
+- [✅] Build input sanitization to handle special characters
+- [✅] Add session target specification (session name or window:pane)
 
 #### tmux read subcommand
 
 Read and tidy the contents of a tmux session pane.
 
-- [ ] Implement tmux read subcommand CLI argument handling
-- [ ] Create tmux session/pane content capture functionality
-- [ ] Add configurable line count option (default: 100 lines)
-- [ ] Implement content tidying features:
-  - [ ] Remove empty/blank lines
-  - [ ] Trim unnecessary whitespace
-  - [ ] Remove duplicate consecutive empty lines
-- [ ] Add session target specification (session name or window:pane)
-- [ ] Implement raw output option (skip tidying)
+- [✅] Implement tmux read subcommand CLI argument handling
+- [✅] Create tmux session/pane content capture functionality
+- [✅] Add configurable line count option (default: 100 lines)
+- [✅] Implement content tidying features:
+  - [✅] Remove empty/blank lines
+  - [✅] Trim unnecessary whitespace
+  - [✅] Remove duplicate consecutive empty lines
+- [✅] Add session target specification (session name or window:pane)
+- [✅] Implement raw output option (skip tidying)
 
 #### tmux ensure subcommand
 
 Check if a tmux session exists and create it if it doesn't (idempotent session creation).
 
-- [ ] Implement tmux ensure subcommand CLI argument handling
-- [ ] Create tmux session existence check functionality
-- [ ] Implement session creation with configurable options:
-  - [ ] Session name specification
-  - [ ] Working directory option
-  - [ ] Initial command to run in session
-- [ ] Add silent mode (no output if session already exists)
-- [ ] Implement verbose mode for detailed status reporting
-- [ ] Create exit codes (0: session exists/created, 1: error)
-- [ ] Update root README.md with tmux command information
+- [✅] Implement tmux ensure subcommand CLI argument handling
+- [✅] Create tmux session existence check functionality
+- [✅] Implement session creation with configurable options:
+  - [✅] Session name specification
+  - [✅] Working directory option
+  - [✅] Initial command to run in session
+- [✅] Add silent mode (no output if session already exists)
+- [✅] Implement verbose mode for detailed status reporting
+- [✅] Create exit codes (0: session exists/created, 1: error)
+- [✅] Update root README.md with tmux command information
 
 ---
 

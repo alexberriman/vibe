@@ -1,0 +1,1 @@
+export { tmuxCommand } from "./tmux";
