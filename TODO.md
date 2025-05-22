@@ -4,83 +4,6 @@ A collection of CLI tools to enhance my coding workflow.
 
 ---
 
-## storybook-urls command
-
-Create a CLI tool that scans a directory for Storybook stories and generates a JSON array of Storybook URLs.
-
-### Core Functionality
-
-[✅] Set up the command structure (`commands/storybook-urls/`)
-[✅] Implement basic CLI argument handling using Commander.js
-[✅] Create directory scanning utility that respects .gitignore patterns
-[✅] Develop Storybook configuration detector to find .storybook directory or config files
-[✅] Build file extension filter to identify story files (.stories.tsx, .stories.ts, .stories.jsx, .stories.js, etc.)
-[✅] Create parsers for both TypeScript and JavaScript story files
-[✅] Implement shared parser logic with format-specific adaptations
-[✅] Implement URL generator for both regular and frame URLs
-[✅] Add port detection or configuration (default: 6006)
-[✅] Build JSON output formatter
-[✅] Implement pretty-print option for formatted output
-[✅] Add filtering options (by component type, file path, etc.)
-[✅] Create progress indicator for large codebases
-[✅] Add option to save output to file (default: print to console)
-[✅] Create detailed command README.md with usage examples
-
----
-
-## server-run command
-
-Create a CLI tool that spins up a server (e.g., Storybook, dev server), waits for it to be ready, runs commands against it, and then tears it down.
-
-### Core Functionality
-
-- [✅] Set up the command structure (`commands/server-run/`)
-- [✅] Implement basic CLI argument handling using Commander.js
-- [✅] Create server launcher with configurable start command
-- [✅] Implement URL/port availability detection
-- [✅] Add polling mechanism to wait for server readiness
-- [✅] Create command runner to execute tasks against running server
-- [✅] Implement server teardown process
-- [✅] Add timeout configuration and handling
-- [✅] Implement proper process signal handling (SIGINT, SIGTERM)
-- [✅] Add error handling for server startup failures
-- [✅] Implement server output parsing to detect error patterns
-- [✅] Add detection for stalled processes that show no progress
-- [✅] Create smart timeout system that differentiates between "still starting" and "error state"
-- [✅] Implement error capture and formatting for detailed reporting
-- [✅] Create support for environment variable passing
-- [✅] Add logging with different verbosity levels
-- [✅] Add option to keep server running after command completion
-- [✅] Create detailed command README.md with usage examples
-
----
-
-## react-routes command
-
-Create a CLI tool that analyzes a React app directory and generates a JSON array of application routes as URLs.
-
-### Core Functionality
-
-- [✅] Set up the command structure (`commands/react-routes/`)
-- [✅] Implement basic CLI argument handling using Commander.js
-- [✅] Create directory scanning utility that respects .gitignore patterns
-- [✅] Implement Vite configuration detector to find port settings (default: 5173)
-- [✅] Create React Router detection logic (find router definition files in both TS and JS)
-- [✅] Build parser for JSX-style routes that handles both TSX and JSX syntax
-- [✅] Implement parser for object-based routes with support for TS and JS differences
-- [✅] Add support for data router API with TypeScript generics and JavaScript implementations
-- [✅] Handle nested route extraction and path building
-- [✅] Create system for handling dynamic route parameters (e.g., `/users/:id`)
-- [✅] Develop base URL construction with correct protocol, host, and port
-- [✅] Build modular router detection system for future expansions
-- [✅] Build JSON output formatter
-- [✅] Implement pretty-print option for formatted output
-- [✅] Add option to save output to file (default: print to console)
-- [✅] Add option to filter routes by pattern
-- [✅] Create detailed command README.md with usage examples
-
----
-
 ## nextjs-routes command
 
 Create a CLI tool that analyzes a Next.js app directory and generates a JSON array of application routes as URLs.
@@ -108,45 +31,86 @@ Create a CLI tool that analyzes a Next.js app directory and generates a JSON arr
 - [ ] Add option to save output to file (default: print to console)
 - [ ] Add options to filter routes by pattern or type (page routes, API routes)
 - [✅] Create detailed command README.md with usage examples
+- [ ] Update root README.md with nextjs-routes command information
 
 ---
 
-## dom-audit command
+## tmux command
 
-Create a simple wrapper for the @alexberriman/visual-dom-auditor package.
+Create a CLI tool with subcommands for tmux session management (write, read, ensure).
 
 ### Core Functionality
 
-- [✅] Set up the command structure (`commands/dom-audit/`)
-- [✅] Implement basic CLI argument handling using Commander.js
-- [✅] Create direct wrapper for npx @alexberriman/visual-dom-auditor
-- [✅] Pass through all command-line arguments to the underlying package
-- [✅] Add command documentation to README.md
+- [ ] Set up the command structure (`commands/tmux/`)
+- [ ] Implement main tmux command with subcommand routing using Commander.js
+- [ ] Create shared tmux utilities for session validation and error handling
+
+#### tmux write subcommand
+
+Send input to a tmux session with support for chunked large strings and specific keystrokes.
+
+- [ ] Implement tmux write subcommand CLI argument handling
+- [ ] Create tmux session detection and validation
+- [ ] Implement string chunking for large input blocks
+- [ ] Add support for sending specific keystrokes (Enter, Ctrl+C, etc.)
+- [ ] Create timing/delay functionality for waiting between sends
+- [ ] Build input sanitization to handle special characters
+- [ ] Add session target specification (session name or window:pane)
+
+#### tmux read subcommand
+
+Read and tidy the contents of a tmux session pane.
+
+- [ ] Implement tmux read subcommand CLI argument handling
+- [ ] Create tmux session/pane content capture functionality
+- [ ] Add configurable line count option (default: 100 lines)
+- [ ] Implement content tidying features:
+  - [ ] Remove empty/blank lines
+  - [ ] Trim unnecessary whitespace
+  - [ ] Remove duplicate consecutive empty lines
+- [ ] Add session target specification (session name or window:pane)
+- [ ] Implement raw output option (skip tidying)
+
+#### tmux ensure subcommand
+
+Check if a tmux session exists and create it if it doesn't (idempotent session creation).
+
+- [ ] Implement tmux ensure subcommand CLI argument handling
+- [ ] Create tmux session existence check functionality
+- [ ] Implement session creation with configurable options:
+  - [ ] Session name specification
+  - [ ] Working directory option
+  - [ ] Initial command to run in session
+- [ ] Add silent mode (no output if session already exists)
+- [ ] Implement verbose mode for detailed status reporting
+- [ ] Create exit codes (0: session exists/created, 1: error)
+- [ ] Update root README.md with tmux command information
 
 ---
 
-## screenshot command
+## openai command
 
-Create a simple wrapper for the @alexberriman/screenshotter package.
-
-### Core Functionality
-
-- [✅] Set up the command structure (`commands/screenshot/`)
-- [✅] Implement basic CLI argument handling using Commander.js
-- [✅] Create direct wrapper for npx @alexberriman/screenshotter
-- [✅] Pass through all command-line arguments to the underlying package
-- [✅] Add command documentation to README.md
-
----
-
-## design-feedback command
-
-Create a simple wrapper for the @alexberriman/openai-designer-feedback package.
+Create a CLI tool for prompting OpenAI/ChatGPT with support for system prompts, user prompts, model selection, and structured JSON responses.
 
 ### Core Functionality
 
-- [✅] Set up the command structure (`commands/design-feedback/`)
-- [✅] Implement basic CLI argument handling using Commander.js
-- [✅] Create direct wrapper for npx @alexberriman/openai-designer-feedback
-- [✅] Pass through all command-line arguments to the underlying package
-- [✅] Add command documentation to README.md
+- [ ] Set up the command structure (`commands/openai/`)
+- [ ] Implement basic CLI argument handling using Commander.js
+- [ ] Add OpenAI SDK dependency and configuration
+- [ ] Create API key handling (environment variable or config file)
+- [ ] Implement model selection with default to gpt-4.1-mini
+- [ ] Add system prompt specification (via argument or file)
+- [ ] Add user prompt specification (via argument or file)
+- [ ] Implement structured response support:
+  - [ ] JSON schema input handling (via argument or file)
+  - [ ] Zod schema integration for response parsing
+  - [ ] Response validation and error handling
+- [ ] Create response formatting options:
+  - [ ] Raw response output
+  - [ ] Pretty-printed JSON output
+  - [ ] Parsed structured output display
+- [ ] Add error handling for API failures and rate limits
+- [ ] Implement timeout and retry logic
+- [ ] Add verbose mode for debugging API calls
+- [ ] Create detailed command README.md with usage examples
+- [ ] Update root README.md with openai command information
