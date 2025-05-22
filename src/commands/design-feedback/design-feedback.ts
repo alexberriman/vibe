@@ -1,10 +1,6 @@
 import { Command } from "commander";
 import { spawn } from "node:child_process";
 
-type DesignFeedbackOptions = {
-  readonly args?: string[];
-};
-
 /**
  * Design Feedback command - wrapper for @alexberriman/openai-designer-feedback
  */

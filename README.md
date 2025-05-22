@@ -1,6 +1,22 @@
-# Vibe 🎵
+<div align="center">
 
-A collection of powerful CLI tools to supercharge your development workflow with intelligent route discovery, automated testing, and visual quality assurance.
+# Vibe ⚡
+
+CLI tools to enhance your development workflow with intelligent route discovery, automated testing, and visual quality assurance.
+
+</div>
+
+## 📋 Commands
+
+| Command | Category | Description |
+|---------|----------|-------------|
+| [`storybook-urls`](#storybook-urls) | 📱 Route Discovery | Generate JSON arrays of Storybook story URLs |
+| [`react-routes`](#react-routes) | 📱 Route Discovery | Discover all routes in React applications |
+| [`nextjs-routes`](#nextjs-routes) | 📱 Route Discovery | Analyze Next.js apps and extract page/API routes |
+| [`server-run`](#server-run) | 🖥️ Server Management | Orchestrate server lifecycle with automated testing |
+| [`screenshot`](#screenshot) | 🎨 Visual QA | Capture high-quality screenshots with device emulation |
+| [`dom-audit`](#dom-audit) | 🎨 Visual QA | Detect visual and accessibility issues |
+| [`design-feedback`](#design-feedback) | 🎨 Visual QA | Get AI-powered design feedback and suggestions |
 
 ## 🚀 Quick Start
 

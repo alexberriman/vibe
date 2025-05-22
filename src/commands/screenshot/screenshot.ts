@@ -1,10 +1,6 @@
 import { Command } from "commander";
 import { spawn } from "node:child_process";
 
-type ScreenshotOptions = {
-  readonly args?: string[];
-};
-
 /**
  * Screenshot command - wrapper for @alexberriman/screenshotter
  */

@@ -1,10 +1,6 @@
 import { Command } from "commander";
 import { spawn } from "node:child_process";
 
-type DomAuditOptions = {
-  readonly args?: string[];
-};
-
 /**
  * DOM audit command - wrapper for @alexberriman/visual-dom-auditor
  */
