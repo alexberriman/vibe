@@ -53,6 +53,10 @@ vi.mock("./commands/tmux/index.js", () => ({
   tmuxCommand: vi.fn().mockReturnValue("mocked-tmux-command"),
 }));
 
+vi.mock("./commands/openai/index.js", () => ({
+  openaiCommand: vi.fn().mockReturnValue("mocked-openai-command"),
+}));
+
 describe("CLI", () => {
   it("should initialize correctly", async () => {
     // Reset process.argv for the test
@@ -86,6 +90,7 @@ describe("CLI", () => {
     expect(mockCommandInstance.addCommand).toHaveBeenCalledWith("mocked-screenshot-command");
     expect(mockCommandInstance.addCommand).toHaveBeenCalledWith("mocked-design-feedback-command");
     expect(mockCommandInstance.addCommand).toHaveBeenCalledWith("mocked-tmux-command");
+    expect(mockCommandInstance.addCommand).toHaveBeenCalledWith("mocked-openai-command");
 
     // Verify that parse was called with process.argv
     expect(mockCommandInstance.parse).toHaveBeenCalledWith(process.argv);

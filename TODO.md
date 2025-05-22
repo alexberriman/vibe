@@ -94,23 +94,22 @@ Create a CLI tool for prompting OpenAI/ChatGPT with support for system prompts, 
 
 ### Core Functionality
 
-- [ ] Set up the command structure (`commands/openai/`)
-- [ ] Implement basic CLI argument handling using Commander.js
-- [ ] Add OpenAI SDK dependency and configuration
-- [ ] Create API key handling (environment variable or config file)
-- [ ] Implement model selection with default to gpt-4.1-mini
-- [ ] Add system prompt specification (via argument or file)
-- [ ] Add user prompt specification (via argument or file)
-- [ ] Implement structured response support:
-  - [ ] JSON schema input handling (via argument or file)
-  - [ ] Zod schema integration for response parsing
-  - [ ] Response validation and error handling
-- [ ] Create response formatting options:
-  - [ ] Raw response output
-  - [ ] Pretty-printed JSON output
-  - [ ] Parsed structured output display
-- [ ] Add error handling for API failures and rate limits
-- [ ] Implement timeout and retry logic
-- [ ] Add verbose mode for debugging API calls
-- [ ] Create detailed command README.md with usage examples
+- [✅] Set up the command structure (`commands/openai/`)
+- [✅] Implement basic CLI argument handling using Commander.js
+- [✅] Add OpenAI SDK dependency and configuration
+- [✅] Create API key handling (environment variable or config file)
+- [✅] Implement model selection with default to gpt-4o-mini
+- [✅] Add system prompt specification (via argument or file)
+- [✅] Add user prompt specification (via argument or file)
+- [✅] Implement structured response support:
+  - [✅] JSON schema input handling (via argument or file)
+  - [✅] Response validation and error handling
+- [✅] Create response formatting options:
+  - [✅] Raw response output
+  - [✅] Pretty-printed JSON output
+  - [✅] Parsed structured output display
+- [✅] Add error handling for API failures and rate limits
+- [✅] Implement timeout and retry logic
+- [✅] Add verbose mode for debugging API calls
+- [✅] Create detailed command README.md with usage examples
 - [ ] Update root README.md with openai command information
