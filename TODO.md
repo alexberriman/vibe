@@ -18,20 +18,20 @@ Create a CLI tool that analyzes a Next.js app directory and generates a JSON arr
 - [✅] Build file system analyzer for app router directory structure
 - [✅] Create file system analyzer for pages router directory structure
 - [✅] Implement special file detection (page.js/tsx, layout.js/tsx, route.js/tsx)
-- [ ] Create parser for app router route groups (folders with parentheses)
-- [ ] Add support for parallel routes (folders with @ prefix)
-- [ ] Build handler for dynamic route segments ([param], [...catchAll], [[...optionalCatchAll]])
-- [ ] Create path builder that correctly handles route groups and dynamic segments
-- [ ] Add support for API routes detection (app/api and pages/api)
-- [ ] Develop metadata extraction from route files where possible
-- [ ] Implement URL generator with correct base URL and paths
+- [✅] Create parser for app router route groups (folders with parentheses)
+- [✅] Add support for parallel routes (folders with @ prefix)
+- [✅] Build handler for dynamic route segments ([param], [...catchAll], [[...optionalCatchAll]])
+- [✅] Create path builder that correctly handles route groups and dynamic segments
+- [✅] Add support for API routes detection (app/api and pages/api)
+- [✅] Develop metadata extraction from route files where possible
+- [✅] Implement URL generator with correct base URL and paths
 - [ ] Add support for Next.js middleware and rewrites detection if present
-- [ ] Build JSON output formatter with route details
-- [ ] Implement pretty-print option for formatted output
-- [ ] Add option to save output to file (default: print to console)
-- [ ] Add options to filter routes by pattern or type (page routes, API routes)
+- [✅] Build JSON output formatter with route details
+- [✅] Implement pretty-print option for formatted output
+- [✅] Add option to save output to file (default: print to console)
+- [✅] Add options to filter routes by pattern or type (page routes, API routes)
 - [✅] Create detailed command README.md with usage examples
-- [ ] Update root README.md with nextjs-routes command information
+- [✅] Update root README.md with nextjs-routes command information
 
 ---
 
