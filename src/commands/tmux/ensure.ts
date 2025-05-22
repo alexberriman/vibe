@@ -79,20 +79,13 @@ export const ensureSubcommand = (): Command => {
   const command = new Command("ensure");
 
   command.description("Ensure a tmux session exists (create if it doesn't)");
+  command.argument("<session>", "Name of the tmux session");
   command.option("-d, --directory <path>", "Working directory for new session");
   command.option("-c, --command <cmd>", "Initial command to run in new session");
   command.option("-s, --silent", "No output if session already exists");
   command.option("-v, --verbose", "Detailed status reporting");
 
-  command.action((options: EnsureOptions, cmd) => {
-    // Get session name from arguments
-    const session = cmd.args?.[0];
-
-    if (!session) {
-      console.error("Error: Session name is required");
-      process.exit(1);
-    }
-
+  command.action((session: string, options: EnsureOptions) => {
     ensureTmuxSession({ ...options, session });
   });
 
