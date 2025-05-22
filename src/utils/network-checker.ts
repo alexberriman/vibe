@@ -1,5 +1,6 @@
 import { createServer } from "node:net";
-import { Result, Ok, Err } from "ts-results";
+import tsResults, { type Result } from "ts-results";
+const { Ok, Err } = tsResults;
 import type { Logger } from "pino";
 import { setTimeout, clearTimeout } from "node:timers";
 
