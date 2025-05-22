@@ -64,30 +64,50 @@ async function waitForServerUsingPort(
     process.exit(1);
   }
 
-  const waitPortResult = await waitForPortToBecomeUnavailable({
-    port: options.port,
+  // First try URL-based checking if possible - this is more reliable
+  const url = `http://localhost:${options.port}`;
+  logger.debug(`Attempting URL-based readiness check at ${url}`);
+
+  const waitUrlResult = await waitForUrl({
+    url,
     timeout: options.timeout,
     interval: options.interval,
     logger,
   });
 
-  if (waitPortResult.err) {
-    logger.error(`Error waiting for port: ${waitPortResult.val.message}`);
+  if (waitUrlResult.err) {
+    logger.debug(`URL check failed: ${waitUrlResult.val.message}, falling back to port check`);
+
+    // Fall back to port checking
+    const waitPortResult = await waitForPortToBecomeUnavailable({
+      port: options.port,
+      timeout: options.timeout,
+      interval: options.interval,
+      logger,
+    });
+
+    if (waitPortResult.err) {
+      logger.error(`Error waiting for port: ${waitPortResult.val.message}`);
+      await server.kill();
+      process.exit(1);
+    }
+
+    if (!waitPortResult.val) {
+      logger.error(`Timed out waiting for port ${options.port} to become unavailable.`);
+      await server.kill();
+      process.exit(1);
+    }
+  } else if (!waitUrlResult.val) {
+    logger.error(`Timed out waiting for URL ${url} to become available.`);
     await server.kill();
     process.exit(1);
   }
 
-  if (waitPortResult.val) {
-    logger.info(`Port ${options.port} is now being used by the server.`);
+  logger.info(`Server is ready at port ${options.port}.`);
 
-    // Mark the server as successfully started
-    if ("markStartupCompleted" in server) {
-      (server as ServerInstance & { markStartupCompleted: () => void }).markStartupCompleted();
-    }
-  } else {
-    logger.error(`Timed out waiting for port ${options.port} to become unavailable.`);
-    await server.kill();
-    process.exit(1);
+  // Mark the server as successfully started
+  if ("markStartupCompleted" in server) {
+    (server as ServerInstance & { markStartupCompleted: () => void }).markStartupCompleted();
   }
 }
 
