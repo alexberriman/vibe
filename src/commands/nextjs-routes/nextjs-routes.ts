@@ -11,6 +11,10 @@ import {
   analyzePagesRouter,
   type NextjsPagesRoute,
 } from "../../utils/nextjs-pages-router-analyzer.js";
+import {
+  detectNextjsMiddleware,
+  type NextjsMiddlewareResult,
+} from "../../utils/nextjs-middleware-detector.js";
 
 type NextjsRoutesOptions = {
   readonly path?: string;
@@ -122,6 +126,7 @@ async function scanNextjsProject(
   port: number;
   appRoutes: NextjsAppRoute[];
   pagesRoutes: NextjsPagesRoute[];
+  middleware: NextjsMiddlewareResult;
 }> {
   logger.info(`Scanning Next.js project directory: ${dirPath}`);
 
@@ -178,7 +183,13 @@ async function scanNextjsProject(
     logger.info(`Found ${pagesRoutes.length} routes in Pages Router`);
   }
 
-  return { structure, port: configResult.port, appRoutes, pagesRoutes };
+  // Detect middleware and rewrites
+  const middleware = await detectNextjsMiddleware({
+    basePath: dirPath,
+    logger,
+  });
+
+  return { structure, port: configResult.port, appRoutes, pagesRoutes, middleware };
 }
 
 /**
@@ -203,7 +214,7 @@ export function nextjsRoutesCommand(): Command {
         const dirPath = options.path || ".";
 
         // Scan the Next.js project directory and detect structure and configuration
-        const { structure, port, appRoutes, pagesRoutes } = await scanNextjsProject(
+        const { structure, port, appRoutes, pagesRoutes, middleware } = await scanNextjsProject(
           dirPath,
           logger
         );
@@ -242,6 +253,13 @@ export function nextjsRoutesCommand(): Command {
             hasPagesRouter: structure.hasPagesRouter,
             appDirectory: structure.appDirectory || null,
             pagesDirectory: structure.pagesDirectory || null,
+          },
+          middleware: {
+            exists: middleware.middleware.exists,
+            filePath: middleware.middleware.filePath || null,
+            matcher: middleware.middleware.matcher || null,
+            rewrites: middleware.rewrites,
+            redirects: middleware.redirects,
           },
           routes: filteredRoutes,
         };

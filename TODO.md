@@ -112,4 +112,4 @@ Create a CLI tool for prompting OpenAI/ChatGPT with support for system prompts, 
 - [✅] Implement timeout and retry logic
 - [✅] Add verbose mode for debugging API calls
 - [✅] Create detailed command README.md with usage examples
-- [ ] Update root README.md with openai command information
+- [✅] Update root README.md with openai command information
