@@ -197,4 +197,53 @@ describe("TypeScriptStoryParser", () => {
     expect(stories[1].name).toBe("Checked");
     expect(stories[1].id).toBe("forms-radio--checked");
   });
+
+  it("should handle CSF3 format with const meta", async () => {
+    const mockFileContent = `
+      import type { Meta, StoryObj } from "@storybook/react";
+      import { Radio } from "./radio";
+      
+      const meta: Meta<typeof Radio> = {
+        title: "Forms/Radio",
+        component: Radio,
+        parameters: {
+          layout: "centered",
+        },
+      };
+      
+      export default meta;
+      type Story = StoryObj<typeof Radio>;
+      
+      export const Default: Story = {
+        args: {
+          label: "Option 1",
+        },
+      };
+      
+      export const Checked: Story = {
+        args: {
+          label: "Option 2",
+          checked: true,
+        },
+      };
+    `;
+
+    vi.spyOn(fs, "readFile").mockResolvedValue(mockFileContent);
+
+    const parser = new TypeScriptStoryParser({
+      filePath: "/path/to/Radio.stories.tsx",
+      logger: { error: vi.fn() } as unknown as import("pino").Logger,
+    });
+
+    const stories = await parser.parse();
+
+    expect(stories).toHaveLength(2);
+    expect(stories[0].name).toBe("Default");
+    expect(stories[0].componentName).toBe("Radio");
+    expect(stories[0].id).toBe("forms-radio--default");
+    expect(stories[0].title).toBe("Forms/Radio");
+
+    expect(stories[1].name).toBe("Checked");
+    expect(stories[1].id).toBe("forms-radio--checked");
+  });
 });

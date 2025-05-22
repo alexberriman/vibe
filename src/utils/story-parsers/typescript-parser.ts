@@ -23,11 +23,23 @@ export class TypeScriptStoryParser extends BaseStoryParser {
 
     try {
       // Extract default export meta (for title/component info)
-      const defaultExportMatch = content.match(/export\s+default\s+({[^}]*}|{[\s\S]*?^})/m);
+      // Handle both CSF2 format: export default { title: "..." }
+      // and CSF3 format: const meta = { title: "..." }; export default meta;
+      let metaTitle = "";
 
-      const metaTitle = defaultExportMatch
-        ? this.extractValueFromMatch(defaultExportMatch[1], "title")
-        : "";
+      // Try CSF2 format first: export default { ... }
+      const defaultExportMatch = content.match(/export\s+default\s+({[^}]*}|{[\s\S]*?^})/m);
+      if (defaultExportMatch) {
+        metaTitle = this.extractValueFromMatch(defaultExportMatch[1], "title");
+      }
+
+      // If no title found, try CSF3 format: const meta = { ... }; export default meta;
+      if (!metaTitle) {
+        const metaConstMatch = content.match(/const\s+meta[^=]*=\s*({[^}]*}|{[\s\S]*?^})/m);
+        if (metaConstMatch) {
+          metaTitle = this.extractValueFromMatch(metaConstMatch[1], "title");
+        }
+      }
 
       // Try to extract displayName for component
       const displayNameMatch = content.match(
