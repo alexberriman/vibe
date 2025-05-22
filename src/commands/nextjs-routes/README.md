@@ -72,27 +72,115 @@ vibe nextjs-routes -t api
 
 ## Output Format
 
-The command outputs a JSON array of route objects, each containing:
+The command outputs a JSON object containing route information and metadata:
 
 ```json
-[
-  {
-    "path": "/about",
-    "url": "http://localhost:3000/about",
-    "type": "page",
-    "hasDynamicSegments": false
+{
+  "scannedDirectory": ".",
+  "baseUrl": "http://localhost:3000",
+  "routesFound": 3,
+  "totalRoutesFound": 3,
+  "structure": {
+    "hasAppRouter": true,
+    "hasPagesRouter": false,
+    "appDirectory": "/path/to/app",
+    "pagesDirectory": null
   },
-  {
-    "path": "/api/users",
-    "url": "http://localhost:3000/api/users",
-    "type": "api",
-    "hasDynamicSegments": false
-  },
-  {
-    "path": "/posts/[id]",
-    "url": "http://localhost:3000/posts/[id]",
-    "type": "page",
-    "hasDynamicSegments": true
-  }
-]
+  "routes": [
+    {
+      "path": "/about",
+      "url": "http://localhost:3000/about",
+      "type": "page",
+      "fileType": "page",
+      "hasDynamicSegments": false,
+      "source": "app",
+      "isClientComponent": true,
+      "isServerComponent": false,
+      "metadata": {
+        "hasDefaultExport": true,
+        "namedExports": [],
+        "isClientComponent": true,
+        "isServerComponent": false,
+        "hasMiddleware": false,
+        "imports": ["react", "@next/font"],
+        "directives": ["use client"],
+        "errorHandling": false,
+        "dataFetching": []
+      }
+    },
+    {
+      "path": "/api/users",
+      "url": "http://localhost:3000/api/users",
+      "type": "api",
+      "fileType": "route",
+      "hasDynamicSegments": false,
+      "source": "app",
+      "isClientComponent": false,
+      "isServerComponent": true,
+      "metadata": {
+        "httpMethods": ["GET", "POST"],
+        "hasDefaultExport": false,
+        "namedExports": ["GET", "POST"],
+        "isClientComponent": false,
+        "isServerComponent": true,
+        "hasMiddleware": true,
+        "imports": ["next/server"],
+        "directives": [],
+        "errorHandling": true,
+        "dataFetching": ["fetch"]
+      }
+    },
+    {
+      "path": "/posts/[id]",
+      "url": "http://localhost:3000/posts/[id]",
+      "type": "page",
+      "fileType": "page",
+      "hasDynamicSegments": true,
+      "source": "app",
+      "isClientComponent": false,
+      "isServerComponent": true,
+      "metadata": {
+        "hasDefaultExport": true,
+        "namedExports": ["generateMetadata", "generateStaticParams"],
+        "isClientComponent": false,
+        "isServerComponent": true,
+        "hasMiddleware": false,
+        "imports": ["next"],
+        "directives": [],
+        "errorHandling": false,
+        "dataFetching": ["generateMetadata", "generateStaticParams", "fetch"]
+      }
+    }
+  ]
+}
 ```
+
+## Route Metadata
+
+Each route includes rich metadata extracted from the source files:
+
+### Core Properties
+- `hasDefaultExport`: Whether the file has a default export
+- `namedExports`: Array of named exports (functions, constants)
+- `isClientComponent`: Has "use client" directive
+- `isServerComponent`: Is a server component (default in App Router)
+- `directives`: All "use ..." directives found in the file
+
+### API Route Specific
+- `httpMethods`: HTTP methods exported (GET, POST, PUT, DELETE, etc.)
+- `hasMiddleware`: Uses Next.js middleware (NextRequest, NextResponse)
+
+### Data Fetching
+- `dataFetching`: Detected data fetching patterns:
+  - `fetch` - Uses fetch() API
+  - `getServerSideProps` - Pages Router server-side data fetching
+  - `getStaticProps` - Pages Router static generation
+  - `getStaticPaths` - Pages Router dynamic route pre-generation
+  - `generateMetadata` - App Router metadata generation
+  - `generateStaticParams` - App Router static params generation
+
+### Error Handling
+- `errorHandling`: Detects error boundaries, try/catch blocks, error.tsx files
+
+### Imports
+- `imports`: Key framework and library imports (excludes relative imports)

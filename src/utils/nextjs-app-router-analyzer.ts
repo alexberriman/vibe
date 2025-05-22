@@ -4,6 +4,7 @@ import type { Logger } from "pino";
 import { createLogger } from "./logger.js";
 import { scanDirectory } from "./directory-scanner.js";
 import { detectNextjsSpecialFile, type NextjsFileType } from "./nextjs-special-file-detector.js";
+import { extractRouteMetadata, type RouteMetadata } from "./route-metadata-extractor.js";
 
 /**
  * Represents a route in the Next.js App Router
@@ -24,6 +25,7 @@ export type NextjsAppRoute = {
   readonly fileType: NextjsFileType; // Type of file
   readonly isClientComponent: boolean; // Is this a client component? (has "use client" directive)
   readonly isServerComponent: boolean; // Is this a server component? (default in Next.js App Router)
+  readonly metadata?: RouteMetadata; // Extracted metadata from the route file
 };
 
 /**
@@ -72,7 +74,11 @@ function isOptionalCatchAllRoute(segment: string): boolean {
 /**
  * Parse a file path to extract route information
  */
-function parseFilePath(filePath: string, appDirectory: string): NextjsAppRoute {
+async function parseFilePath(
+  filePath: string,
+  appDirectory: string,
+  logger: Logger
+): Promise<NextjsAppRoute> {
   // Calculate the path relative to the app directory
   const relativePath = path.relative(appDirectory, filePath);
 
@@ -148,6 +154,16 @@ function parseFilePath(filePath: string, appDirectory: string): NextjsAppRoute {
     routePath = `/${routePathSegments.join("/")}`;
   }
 
+  // Extract metadata from the route file
+  let metadata;
+  try {
+    metadata = await extractRouteMetadata({ filePath, logger });
+  } catch (error) {
+    logger.warn(
+      `Failed to extract metadata from ${filePath}: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+
   return {
     relativePath,
     absolutePath: filePath,
@@ -164,6 +180,7 @@ function parseFilePath(filePath: string, appDirectory: string): NextjsAppRoute {
     fileType: fileInfo.fileType,
     isClientComponent: fileInfo.isClientComponent,
     isServerComponent: fileInfo.isServerComponent,
+    metadata,
   };
 }
 
@@ -221,7 +238,9 @@ export async function analyzeAppRouter({
   logger.info(`Found ${routeFiles.length} route files in the App Router`);
 
   // Parse each file to extract route information
-  const routes = routeFiles.map((file) => parseFilePath(file, appDirectory));
+  const routes = await Promise.all(
+    routeFiles.map((file) => parseFilePath(file, appDirectory, logger))
+  );
 
   // Log summary information with enhanced file type detection
   const pageRoutes = routes.filter((route) => route.isPage);

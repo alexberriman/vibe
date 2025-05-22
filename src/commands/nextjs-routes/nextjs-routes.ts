@@ -22,6 +22,7 @@ type NextjsRoutesOptions = {
 };
 
 import { type NextjsFileType } from "../../utils/nextjs-special-file-detector.js";
+import { type RouteMetadata } from "../../utils/route-metadata-extractor.js";
 
 /**
  * Represents a route in the Next.js application
@@ -35,6 +36,7 @@ type NextjsRouteInfo = {
   readonly source: "app" | "pages";
   readonly isClientComponent?: boolean;
   readonly isServerComponent?: boolean;
+  readonly metadata?: RouteMetadata;
 };
 
 /**
@@ -56,6 +58,7 @@ function convertAppRouteToRouteInfo(appRoute: NextjsAppRoute, baseUrl: string): 
     source: "app",
     isClientComponent: appRoute.isClientComponent,
     isServerComponent: appRoute.isServerComponent,
+    metadata: appRoute.metadata,
   };
 }
 
@@ -81,6 +84,7 @@ function convertPagesRouteToRouteInfo(
     source: "pages",
     isClientComponent: pagesRoute.isClientComponent,
     isServerComponent: pagesRoute.isServerComponent,
+    metadata: pagesRoute.metadata,
   };
 }
 

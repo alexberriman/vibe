@@ -4,6 +4,7 @@ import type { Logger } from "pino";
 import { createLogger } from "./logger.js";
 import { scanDirectory } from "./directory-scanner.js";
 import { detectNextjsSpecialFile, type NextjsFileType } from "./nextjs-special-file-detector.js";
+import { extractRouteMetadata, type RouteMetadata } from "./route-metadata-extractor.js";
 
 /**
  * Represents a route in the Next.js Pages Router
@@ -21,6 +22,7 @@ export type NextjsPagesRoute = {
   readonly isSpecialFile: boolean; // Is this a special Next.js file?
   readonly isClientComponent: boolean; // Is this a client component?
   readonly isServerComponent: boolean; // Is this a server component?
+  readonly metadata?: RouteMetadata; // Extracted metadata from the route file
 };
 
 /**
@@ -136,7 +138,11 @@ function filePathToRoutePath(filePath: string, pagesDir: string): string {
 /**
  * Parse a file path to extract route information
  */
-function parseFilePath(filePath: string, pagesDir: string): NextjsPagesRoute {
+async function parseFilePath(
+  filePath: string,
+  pagesDir: string,
+  logger: Logger
+): Promise<NextjsPagesRoute> {
   // Calculate the path relative to the pages directory
   const relativePath = path.relative(pagesDir, filePath);
 
@@ -181,6 +187,16 @@ function parseFilePath(filePath: string, pagesDir: string): NextjsPagesRoute {
     fileType = "page";
   }
 
+  // Extract metadata from the route file
+  let metadata;
+  try {
+    metadata = await extractRouteMetadata({ filePath, logger });
+  } catch (error) {
+    logger.warn(
+      `Failed to extract metadata from ${filePath}: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+
   return {
     relativePath,
     absolutePath: filePath,
@@ -194,6 +210,7 @@ function parseFilePath(filePath: string, pagesDir: string): NextjsPagesRoute {
     isSpecialFile: fileInfo.isSpecialFile,
     isClientComponent: fileInfo.isClientComponent,
     isServerComponent: fileInfo.isServerComponent,
+    metadata,
   };
 }
 
@@ -259,7 +276,9 @@ export async function analyzePagesRouter({
   logger.info(`Found ${routeFiles.length} route files in the Pages Router`);
 
   // Parse each file to extract route information
-  const routes = routeFiles.map((file) => parseFilePath(file, pagesDirectory));
+  const routes = await Promise.all(
+    routeFiles.map((file) => parseFilePath(file, pagesDirectory, logger))
+  );
 
   // Log enhanced summary information with special file detection
   const pageRoutes = routes.filter((route) => route.fileType === "page");
