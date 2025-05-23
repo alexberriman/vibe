@@ -99,7 +99,7 @@ Create an interactive CLI tool to scaffold new "vibe coding" projects from templ
 ### Documentation
 
 - [x] Create detailed nested command README.md with usage examples
-- [ ] Update root README.md with scaffold command information
+- [x] Update root README.md with scaffold command information
 
 ### Dependencies to Add
 
