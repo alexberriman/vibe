@@ -184,6 +184,129 @@ export class TemplateProcessor {
     } catch {
       this.logger.debug("No package.json found or error processing it");
     }
+
+    // Generate README.md if it doesn't exist
+    await this.generateReadmeIfNeeded(targetPath, context, options);
+  }
+
+  /**
+   * Generate README.md if it doesn't already exist
+   */
+  private async generateReadmeIfNeeded(
+    targetPath: string,
+    context: PlaceholderContext,
+    options: ProcessingOptions
+  ): Promise<void> {
+    const readmePath = path.join(targetPath, "README.md");
+
+    // Check if README.md already exists
+    try {
+      await fs.access(readmePath);
+      this.logger.debug("README.md already exists, skipping generation");
+      return;
+    } catch {
+      // README.md doesn't exist, generate it
+    }
+
+    const readmeContent = this.generateReadmeContent(context);
+
+    if (!options.dryRun) {
+      await fs.writeFile(readmePath, readmeContent, "utf-8");
+      this.logger.debug("Generated README.md");
+    }
+  }
+
+  /**
+   * Generate README.md content based on project context
+   */
+  private generateReadmeContent(context: PlaceholderContext): string {
+    const { projectName, description, authorName, license, template } = context;
+
+    // Detect project type for customized instructions
+    const isReactProject = template?.toLowerCase().includes("react") || false;
+    const isNodeProject = true; // Most templates will be Node.js based
+
+    const sections = [
+      `# ${projectName}`,
+      ``,
+      `${description}`,
+      ``,
+      `## Features`,
+      ``,
+      `- 🚀 Modern development setup`,
+      `- 📝 TypeScript support`,
+      `- 🎨 ${isReactProject ? "React components" : "Clean architecture"}`,
+      `- ✅ Testing configured`,
+      `- 🔧 Development tools included`,
+      ``,
+      `## Getting Started`,
+      ``,
+      `### Prerequisites`,
+      ``,
+      `- Node.js 18+ installed`,
+      `- npm or yarn package manager`,
+      ``,
+      `### Installation`,
+      ``,
+      `1. Clone the repository:`,
+      `\`\`\`bash`,
+      `git clone <your-repo-url>`,
+      `cd ${this.toKebabCase(projectName)}`,
+      `\`\`\``,
+      ``,
+      `2. Install dependencies:`,
+      `\`\`\`bash`,
+      `npm install`,
+      `\`\`\``,
+      ``,
+      `3. Start the development server:`,
+      `\`\`\`bash`,
+      `npm run dev`,
+      `\`\`\``,
+      ``,
+      `## Available Scripts`,
+      ``,
+      `\`\`\`bash`,
+      `npm run dev      # Start development server`,
+      `npm run build    # Build for production`,
+      `npm run test     # Run tests`,
+      `npm run lint     # Run linter`,
+      `npm run format   # Format code`,
+      `\`\`\``,
+      ``,
+      `## Project Structure`,
+      ``,
+      `\`\`\``,
+      `${this.toKebabCase(projectName)}/`,
+      `├── src/           # Source code`,
+      isReactProject ? `├── public/        # Public assets` : `├── lib/           # Library code`,
+      `├── tests/         # Test files`,
+      `├── docs/          # Documentation`,
+      `└── package.json   # Project configuration`,
+      `\`\`\``,
+      ``,
+      `## Contributing`,
+      ``,
+      `1. Fork the repository`,
+      `2. Create your feature branch: \`git checkout -b feature/amazing-feature\``,
+      `3. Commit your changes: \`git commit -m 'Add amazing feature'\``,
+      `4. Push to the branch: \`git push origin feature/amazing-feature\``,
+      `5. Open a Pull Request`,
+      ``,
+      `## License`,
+      ``,
+      `This project is licensed under the ${license || "MIT"} License - see the [LICENSE](LICENSE) file for details.`,
+      ``,
+      `## Author`,
+      ``,
+      `Created by **${authorName || "Unknown"}**`,
+      ``,
+      `---`,
+      ``,
+      `*Generated with [Vibe CLI](https://github.com/alexberriman/vibe) 🚀*`,
+    ];
+
+    return sections.join("\n");
   }
 
   /**

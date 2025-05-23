@@ -302,4 +302,65 @@ Lower: {{projectName.lower}}
     expect(processedPackageJson.description).toBe("Test description");
     expect(processedPackageJson.author).toBe("Test Author <test@example.com>");
   });
+
+  it("should generate README.md when it doesn't exist", async () => {
+    // Don't create a README.md in the source
+    const answers: ScaffoldPromptAnswers = {
+      template: "vibe-react",
+      projectName: "Awesome React App",
+      description: "A fantastic React application",
+      authorName: "John Developer",
+      authorEmail: "john@example.com",
+      license: "MIT",
+      outputDirectory: targetDir,
+    };
+
+    const config: TemplateConfig = {
+      name: "vibe-react",
+      description: "React template",
+      repository: "test-repo",
+    };
+
+    await processor.processTemplate(sourceDir, targetDir, answers, config);
+
+    const readmeContent = await fs.readFile(path.join(targetDir, "README.md"), "utf-8");
+
+    expect(readmeContent).toContain("# Awesome React App");
+    expect(readmeContent).toContain("A fantastic React application");
+    expect(readmeContent).toContain("Created by **John Developer**");
+    expect(readmeContent).toContain("MIT License");
+    expect(readmeContent).toContain("React components");
+    expect(readmeContent).toContain("awesome-react-app/");
+  });
+
+  it("should not overwrite existing README.md", async () => {
+    const existingReadme = "# Existing README\n\nThis already exists.";
+    await fs.writeFile(path.join(sourceDir, "README.md"), existingReadme);
+
+    const answers: ScaffoldPromptAnswers = {
+      template: "test-template",
+      projectName: "test-project",
+      description: "Test description",
+      authorName: "Test Author",
+      authorEmail: "test@example.com",
+      license: "MIT",
+      outputDirectory: targetDir,
+    };
+
+    const config: TemplateConfig = {
+      name: "test-template",
+      description: "Test template",
+      repository: "test-repo",
+    };
+
+    await processor.processTemplate(sourceDir, targetDir, answers, config);
+
+    const readmeContent = await fs.readFile(path.join(targetDir, "README.md"), "utf-8");
+
+    // Should contain the original content (processed for placeholders)
+    expect(readmeContent).toContain("# Existing README");
+    expect(readmeContent).toContain("This already exists.");
+    // Should NOT contain generated content
+    expect(readmeContent).not.toContain("## Features");
+  });
 });

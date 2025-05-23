@@ -61,10 +61,13 @@ Create an interactive CLI tool to scaffold new "vibe coding" projects from templ
   - [x] Build template file processor for any file type
   - [x] Use globby (already in dependencies) for file pattern matching
   - [x] Add advanced placeholder transformations (kebab-case, camelCase, PascalCase, snake_case, etc.)
-- [ ] Implement README.md generation:
-  - [ ] Create default README template with project information
-  - [ ] Add sections based on template type
-  - [ ] Include getting started instructions
+- [x] Implement README.md generation:
+  - [x] Create default README template with project information
+  - [x] Add sections based on template type (React vs Node.js)
+  - [x] Include getting started instructions
+  - [x] Generate professional project structure documentation
+  - [x] Include contributing guidelines and license information
+  - [x] Respect existing README.md files (no overwriting)
 - [x] Create git repository initialization:
   - [x] Remove existing .git directory from cloned template
   - [x] Initialize fresh git repository
