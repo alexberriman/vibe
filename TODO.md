@@ -4,112 +4,116 @@ A collection of CLI tools to enhance my coding workflow.
 
 ---
 
-## nextjs-routes command
+## scaffold command
 
-Create a CLI tool that analyzes a Next.js app directory and generates a JSON array of application routes as URLs.
-
-### Core Functionality
-
-- [✅] Set up the command structure (`commands/nextjs-routes/`)
-- [✅] Implement basic CLI argument handling using Commander.js
-- [✅] Create directory scanning utility that respects .gitignore patterns
-- [✅] Implement Next.js project structure detection (identify app router and/or pages router)
-- [✅] Develop Next.js configuration detector to find port settings (default: 3000)
-- [✅] Build file system analyzer for app router directory structure
-- [✅] Create file system analyzer for pages router directory structure
-- [✅] Implement special file detection (page.js/tsx, layout.js/tsx, route.js/tsx)
-- [✅] Create parser for app router route groups (folders with parentheses)
-- [✅] Add support for parallel routes (folders with @ prefix)
-- [✅] Build handler for dynamic route segments ([param], [...catchAll], [[...optionalCatchAll]])
-- [✅] Create path builder that correctly handles route groups and dynamic segments
-- [✅] Add support for API routes detection (app/api and pages/api)
-- [✅] Develop metadata extraction from route files where possible
-- [✅] Implement URL generator with correct base URL and paths
-- [✅] Add support for Next.js middleware and rewrites detection if present
-- [✅] Build JSON output formatter with route details
-- [✅] Implement pretty-print option for formatted output
-- [✅] Add option to save output to file (default: print to console)
-- [✅] Add options to filter routes by pattern or type (page routes, API routes)
-- [✅] Create detailed command README.md with usage examples
-- [✅] Update root README.md with nextjs-routes command information
-
----
-
-## ✅ tmux command
-
-Create a CLI tool with subcommands for tmux session management (write, read, ensure).
+Create an interactive CLI tool to scaffold new "vibe coding" projects from templates, with support for non-interactive mode for CI environments.
 
 ### Core Functionality
 
-- [✅] Set up the command structure (`commands/tmux/`)
-- [✅] Implement main tmux command with subcommand routing using Commander.js
-- [✅] Create shared tmux utilities for session validation and error handling
+- [ ] Set up the command structure (`commands/scaffold/`)
+- [ ] Implement basic CLI argument handling using Commander.js with options for non-interactive mode
+- [ ] Add interactive prompt library (prompts) for user input
+- [ ] Create template registry system for managing multiple project templates
+- [ ] Extend existing progress-indicator.ts utility for git clone progress
+- [ ] Use pino logger for styled terminal output (already in dependencies)
 
-#### tmux write subcommand
+### Template Management
 
-Send input to a tmux session with support for chunked large strings and specific keystrokes.
+- [ ] Design template configuration format (template.json or scaffold.config.json in each template repo)
+- [ ] Create template registry that maps template names to git repositories
+- [ ] Implement template metadata structure (name, description, prompts, placeholders)
+- [ ] Build template validation to ensure required files and structure exist
+- [ ] Add support for template-specific post-processing scripts
+- [ ] Create template caching mechanism to avoid re-cloning frequently used templates
 
-- [✅] Implement tmux write subcommand CLI argument handling
-- [✅] Create tmux session detection and validation
-- [✅] Implement string chunking for large input blocks
-- [✅] Add support for sending specific keystrokes (Enter, Ctrl+C, etc.)
-- [✅] Create timing/delay functionality for waiting between sends
-- [✅] Build input sanitization to handle special characters
-- [✅] Add session target specification (session name or window:pane)
+### Interactive Mode
 
-#### tmux read subcommand
+- [ ] Implement template selection prompt (list available templates)
+- [ ] Create dynamic prompt system based on template configuration:
+  - [ ] Project name prompt with validation (valid npm package name)
+  - [ ] Project description prompt
+  - [ ] Author name/email prompts (with git config defaults)
+  - [ ] License selection prompt
+  - [ ] Additional template-specific prompts
+- [ ] Build confirmation prompt showing selected options before scaffolding
+- [ ] Add directory selection/creation prompt with conflict detection
 
-Read and tidy the contents of a tmux session pane.
+### Non-Interactive Mode (CI Support)
 
-- [✅] Implement tmux read subcommand CLI argument handling
-- [✅] Create tmux session/pane content capture functionality
-- [✅] Add configurable line count option (default: 100 lines)
-- [✅] Implement content tidying features:
-  - [✅] Remove empty/blank lines
-  - [✅] Trim unnecessary whitespace
-  - [✅] Remove duplicate consecutive empty lines
-- [✅] Add session target specification (session name or window:pane)
-- [✅] Implement raw output option (skip tidying)
+- [ ] Implement command-line argument parsing for all prompt values
+- [ ] Create validation for required arguments in non-interactive mode
+- [ ] Add --defaults flag to use sensible defaults for optional prompts
+- [ ] Build --dry-run mode to preview changes without execution
+- [ ] Implement --force flag to overwrite existing directories
 
-#### tmux ensure subcommand
+### Scaffolding Process
 
-Check if a tmux session exists and create it if it doesn't (idempotent session creation).
+- [ ] Create temporary directory management for safe operations (use node:fs/promises)
+- [ ] Implement git clone functionality with progress tracking:
+  - [ ] Use simple-git library for git operations
+  - [ ] Add support for specific branch/tag selection
+  - [ ] Handle authentication for private repositories
+  - [ ] Integrate with existing progress-indicator.ts for clone progress
+- [ ] Build file processing engine:
+  - [ ] Implement placeholder replacement system ({{projectName}}, {{description}}, etc.)
+  - [ ] Create package.json modification logic (name, description, author, etc.)
+  - [ ] Add support for renaming files based on project name
+  - [ ] Build template file processor for any file type
+  - [ ] Use globby (already in dependencies) for file pattern matching
+- [ ] Implement README.md generation:
+  - [ ] Create default README template with project information
+  - [ ] Add sections based on template type
+  - [ ] Include getting started instructions
+- [ ] Create git repository initialization:
+  - [ ] Remove existing .git directory from cloned template
+  - [ ] Initialize fresh git repository
+  - [ ] Configure git with user information
+  - [ ] Stage all files
+  - [ ] Create initial commit with --no-verify flag
+  - [ ] Use command-runner.ts utility for git commands
+- [ ] Add post-processing hooks:
+  - [ ] Run npm install if package.json exists
+  - [ ] Execute template-specific setup scripts
+  - [ ] Display next steps to the user using pino logger
 
-- [✅] Implement tmux ensure subcommand CLI argument handling
-- [✅] Create tmux session existence check functionality
-- [✅] Implement session creation with configurable options:
-  - [✅] Session name specification
-  - [✅] Working directory option
-  - [✅] Initial command to run in session
-- [✅] Add silent mode (no output if session already exists)
-- [✅] Implement verbose mode for detailed status reporting
-- [✅] Create exit codes (0: session exists/created, 1: error)
-- [✅] Update root README.md with tmux command information
+### Error Handling & Recovery
 
----
+- [ ] Implement basic error handling with descriptive messages
+- [ ] Clean up temporary files on error or cancellation
 
-## openai command
+### Current Templates
 
-Create a CLI tool for prompting OpenAI/ChatGPT with support for system prompts, user prompts, model selection, and structured JSON responses.
+- [ ] Configure vibe-react template:
+  - [ ] Repository: git@github.com:alexberriman/vibe-react.git
+  - [ ] Create /Users/alexberriman/Documents/personal/vibe-react/scaffold.config.json with:
+    - [ ] Template metadata (name, description)
+    - [ ] Define prompts (projectName, description, author)
+    - [ ] Specify placeholder mappings for file processing
+    - [ ] Configure post-processing steps (npm install, etc.)
+  - [ ] Update /Users/alexberriman/Documents/personal/vibe-react/.gitignore to exclude scaffold-specific files
+  - [ ] Create /Users/alexberriman/Documents/personal/vibe-react/README.template.md for generated projects
 
-### Core Functionality
+### Documentation
 
-- [✅] Set up the command structure (`commands/openai/`)
-- [✅] Implement basic CLI argument handling using Commander.js
-- [✅] Add OpenAI SDK dependency and configuration
-- [✅] Create API key handling (environment variable or config file)
-- [✅] Implement model selection with default to gpt-4o-mini
-- [✅] Add system prompt specification (via argument or file)
-- [✅] Add user prompt specification (via argument or file)
-- [✅] Implement structured response support:
-  - [✅] JSON schema input handling (via argument or file)
-  - [✅] Response validation and error handling
-- [✅] Create response formatting options:
-  - [✅] Raw response output
-  - [✅] Pretty-printed JSON output
-  - [✅] Parsed structured output display
-- [✅] Add error handling for API failures and rate limits
-- [✅] Implement timeout and retry logic
-- [✅] Add verbose mode for debugging API calls
-- [✅] Create detailed command README.md with usage examples
-- [✅] Update root README.md with openai command information
+- [ ] Create detailed command README.md with usage examples
+- [ ] Document template configuration format
+- [ ] Add guide for creating new templates
+- [ ] Update root README.md with scaffold command information
+
+### Dependencies to Add
+
+```json
+{
+  "prompts": "^2.4.2", // Interactive CLI prompts (lighter than inquirer)
+  "simple-git": "^3.27.0" // Git operations (no existing git library in project)
+}
+```
+
+### Leverage Existing Dependencies
+
+- **pino + pino-pretty**: Already used for styled terminal output (no need for chalk)
+- **globby**: Already available for file pattern matching operations
+- **commander**: Already used for CLI argument parsing
+- **progress-indicator.ts**: Existing custom progress bar utility (no need for ora)
+- **command-runner.ts**: Existing utility for running shell commands
+- **node:fs/promises**: Use built-in Node.js file operations (no need for fs-extra)
