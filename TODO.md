@@ -11,8 +11,8 @@ Create an interactive CLI tool to scaffold new "vibe coding" projects from templ
 ### Core Functionality
 
 - [x] Set up the command structure (`commands/scaffold/`)
-- [ ] Implement basic CLI argument handling using Commander.js with options for non-interactive mode
-- [ ] Add interactive prompt library (prompts) for user input
+- [x] Implement basic CLI argument handling using Commander.js with options for non-interactive mode
+- [x] Add interactive prompt library (prompts) for user input
 - [ ] Create template registry system for managing multiple project templates
 - [ ] Extend existing progress-indicator.ts utility for git clone progress
 - [ ] Use pino logger for styled terminal output (already in dependencies)
@@ -28,23 +28,23 @@ Create an interactive CLI tool to scaffold new "vibe coding" projects from templ
 
 ### Interactive Mode
 
-- [ ] Implement template selection prompt (list available templates)
-- [ ] Create dynamic prompt system based on template configuration:
-  - [ ] Project name prompt with validation (valid npm package name)
-  - [ ] Project description prompt
-  - [ ] Author name/email prompts (with git config defaults)
+- [x] Implement template selection prompt (list available templates)
+- [x] Create dynamic prompt system based on template configuration:
+  - [x] Project name prompt with validation (valid npm package name)
+  - [x] Project description prompt
+  - [x] Author name/email prompts (with git config defaults)
   - [ ] License selection prompt
   - [ ] Additional template-specific prompts
 - [ ] Build confirmation prompt showing selected options before scaffolding
-- [ ] Add directory selection/creation prompt with conflict detection
+- [x] Add directory selection/creation prompt with conflict detection
 
 ### Non-Interactive Mode (CI Support)
 
-- [ ] Implement command-line argument parsing for all prompt values
-- [ ] Create validation for required arguments in non-interactive mode
-- [ ] Add --defaults flag to use sensible defaults for optional prompts
-- [ ] Build --dry-run mode to preview changes without execution
-- [ ] Implement --force flag to overwrite existing directories
+- [x] Implement command-line argument parsing for all prompt values
+- [x] Create validation for required arguments in non-interactive mode
+- [x] Add --defaults flag to use sensible defaults for optional prompts
+- [x] Build --dry-run mode to preview changes without execution
+- [x] Implement --force flag to overwrite existing directories
 
 ### Scaffolding Process
 
