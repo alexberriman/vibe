@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { PostProcessor } from "./post-processor.js";
 import type { PostProcessingStep } from "./template-registry.js";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import * as os from "node:os";
 import tsResults from "ts-results";
 const { Ok } = tsResults;
 
@@ -33,11 +36,31 @@ describe("PostProcessor", () => {
     vi.clearAllMocks();
   });
 
-  it("should get default post-processing steps", () => {
-    const steps = postProcessor.getDefaultSteps();
-    expect(steps).toHaveLength(1);
-    expect(steps[0].name).toBe("install-dependencies");
-    expect(steps[0].command).toBe("npm install");
+  it("should get default post-processing steps for project with package.json", async () => {
+    // Create a temporary directory with package.json
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "post-test-"));
+    await fs.writeFile(path.join(tempDir, "package.json"), "{}");
+
+    try {
+      const steps = await postProcessor.getDefaultSteps(tempDir);
+      expect(steps).toHaveLength(1);
+      expect(steps[0].name).toBe("install-dependencies");
+      expect(steps[0].command).toBe("npm install");
+    } finally {
+      await fs.rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("should get empty steps for project without package.json", async () => {
+    // Create a temporary directory without package.json
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "post-test-"));
+
+    try {
+      const steps = await postProcessor.getDefaultSteps(tempDir);
+      expect(steps).toHaveLength(0);
+    } finally {
+      await fs.rm(tempDir, { recursive: true, force: true });
+    }
   });
 
   it("should handle empty post-processing steps", async () => {

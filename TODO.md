@@ -75,10 +75,12 @@ Create an interactive CLI tool to scaffold new "vibe coding" projects from templ
   - [x] Stage all files
   - [x] Create initial commit with --no-verify flag
   - [x] Use command-runner.ts utility for git commands
-- [ ] Add post-processing hooks:
-  - [ ] Run npm install if package.json exists
-  - [ ] Execute template-specific setup scripts
-  - [ ] Display next steps to the user using pino logger
+- [x] Add post-processing hooks:
+  - [x] Run npm install if package.json exists (smart detection)
+  - [x] Execute template-specific setup scripts
+  - [x] Display smart next steps to the user with template-specific guidance
+  - [x] Detect project type (React, Next.js, Node.js) for customized instructions
+  - [x] Include Docker, Storybook, and other tool guidance when detected
 
 ### Error Handling & Recovery
 

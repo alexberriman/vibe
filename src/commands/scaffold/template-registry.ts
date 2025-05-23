@@ -10,6 +10,7 @@ export interface TemplateConfig {
   prompts?: TemplatePrompt[];
   placeholders?: Record<string, string>;
   postProcessing?: PostProcessingStep[];
+  guidance?: string[];
 }
 
 /**

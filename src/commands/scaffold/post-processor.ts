@@ -154,16 +154,26 @@ export class PostProcessor {
   }
 
   /**
-   * Get default post-processing steps
+   * Get default post-processing steps based on project structure
    */
-  getDefaultSteps(): PostProcessingStep[] {
-    return [
-      {
+  async getDefaultSteps(projectPath: string): Promise<PostProcessingStep[]> {
+    const steps: PostProcessingStep[] = [];
+
+    // Only add npm install if package.json exists
+    try {
+      await import("node:fs/promises").then((fs) =>
+        fs.access(path.join(projectPath, "package.json"))
+      );
+      steps.push({
         name: "install-dependencies",
         command: "npm install",
         description: "Installing project dependencies",
-      },
-    ];
+      });
+    } catch {
+      // No package.json found, skip npm install
+    }
+
+    return steps;
   }
 }
 
@@ -178,6 +188,8 @@ export async function runPostProcessing(
   return postProcessor.runPostProcessing(projectPath, steps, options);
 }
 
-export function getDefaultPostProcessingSteps(): PostProcessingStep[] {
-  return postProcessor.getDefaultSteps();
+export async function getDefaultPostProcessingSteps(
+  projectPath: string
+): Promise<PostProcessingStep[]> {
+  return postProcessor.getDefaultSteps(projectPath);
 }

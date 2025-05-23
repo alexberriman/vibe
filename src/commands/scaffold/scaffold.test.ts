@@ -73,7 +73,7 @@ describe("scaffold command", () => {
 
     // Mock post processor
     vi.mocked(runPostProcessing).mockResolvedValue(undefined);
-    vi.mocked(getDefaultPostProcessingSteps).mockReturnValue([]);
+    vi.mocked(getDefaultPostProcessingSteps).mockResolvedValue([]);
 
     // Mock fs operations
     vi.mocked(fs.stat).mockRejectedValue(new Error("Not found"));

@@ -5,6 +5,8 @@ import * as fs from "node:fs/promises";
 import { runInteractivePrompts, getTemplateInfo, getAllTemplates } from "./prompts.js";
 import type { ScaffoldPromptAnswers } from "./prompts.js";
 import { templateRegistry } from "./template-registry.js";
+import type { TemplateConfig } from "./template-registry.js";
+import type { Logger } from "pino";
 import { cloneTemplate, initializeRepository } from "./git-operations.js";
 import { processTemplate } from "./template-processor.js";
 import { runPostProcessing, getDefaultPostProcessingSteps } from "./post-processor.js";
@@ -166,7 +168,9 @@ export async function scaffoldCommand(options: ScaffoldOptions): Promise<void> {
     });
 
     // Run post-processing
-    const postProcessingSteps = templateConfig.postProcessing || getDefaultPostProcessingSteps();
+    const postProcessingSteps =
+      templateConfig.postProcessing ||
+      (await getDefaultPostProcessingSteps(scaffoldConfig.outputDirectory));
     await runPostProcessing(scaffoldConfig.outputDirectory, postProcessingSteps, {
       verbose: options.verbose,
     });
@@ -175,14 +179,109 @@ export async function scaffoldCommand(options: ScaffoldOptions): Promise<void> {
     logger.info("");
     logger.info(`✨ Project created successfully at ${scaffoldConfig.outputDirectory}`);
     logger.info("");
-    logger.info("Next steps:");
-    logger.info(`  cd ${path.relative(process.cwd(), scaffoldConfig.outputDirectory)}`);
-    logger.info("  npm run dev");
-    logger.info("");
-    logger.info("Happy coding! 🚀");
+
+    // Display smart next steps
+    await displayNextSteps(scaffoldConfig, templateConfig, logger);
   } catch (error) {
     logger.error("Failed to scaffold project", error);
     process.exit(1);
+  }
+}
+
+/**
+ * Display smart next steps based on template and project configuration
+ */
+async function displayNextSteps(
+  config: ScaffoldPromptAnswers,
+  templateConfig: TemplateConfig | null,
+  logger: Logger
+): Promise<void> {
+  const relativeDir = path.relative(process.cwd(), config.outputDirectory);
+  const hasPackageJson = await fileExists(path.join(config.outputDirectory, "package.json"));
+  const hasDockerfile = await fileExists(path.join(config.outputDirectory, "Dockerfile"));
+  const hasStorybookConfig = await fileExists(path.join(config.outputDirectory, ".storybook"));
+
+  // Detect project type
+  const isReactProject = config.template?.toLowerCase().includes("react") || false;
+  const isNextJsProject = config.template?.toLowerCase().includes("next") || false;
+  const isNodeProject = hasPackageJson;
+
+  logger.info("Next steps:");
+  logger.info("");
+
+  // Step 1: Navigate to project
+  logger.info(`1. Navigate to your project:`);
+  logger.info(`   cd ${relativeDir}`);
+  logger.info("");
+
+  // Step 2: Development commands
+  if (hasPackageJson) {
+    logger.info(`2. Start development:`);
+    if (isNextJsProject) {
+      logger.info(`   npm run dev     # Start Next.js development server`);
+      logger.info(`   npm run build   # Build for production`);
+    } else if (isReactProject) {
+      logger.info(`   npm run dev     # Start development server`);
+      logger.info(`   npm run build   # Build for production`);
+    } else {
+      logger.info(`   npm run dev     # Start development mode`);
+      logger.info(`   npm run build   # Build the project`);
+    }
+    logger.info(`   npm test        # Run tests`);
+    logger.info("");
+  }
+
+  // Step 3: Additional tools
+  let stepNumber = 3;
+  if (hasStorybookConfig) {
+    logger.info(`${stepNumber}. Run Storybook:`);
+    logger.info(`   npm run storybook`);
+    logger.info("");
+    stepNumber++;
+  }
+
+  if (hasDockerfile) {
+    logger.info(`${stepNumber}. Run with Docker:`);
+    logger.info(`   docker build -t ${config.projectName.toLowerCase()} .`);
+    logger.info(`   docker run -p 3000:3000 ${config.projectName.toLowerCase()}`);
+    logger.info("");
+    stepNumber++;
+  }
+
+  // Step 4: Template-specific guidance
+  if (templateConfig?.guidance) {
+    logger.info(`${stepNumber}. Template-specific guidance:`);
+    for (const guidance of templateConfig.guidance) {
+      logger.info(`   ${guidance}`);
+    }
+    logger.info("");
+    stepNumber++;
+  }
+
+  // Final encouragement
+  logger.info("📚 Learn more:");
+  if (isReactProject) {
+    logger.info("   React: https://react.dev");
+  }
+  if (isNextJsProject) {
+    logger.info("   Next.js: https://nextjs.org/docs");
+  }
+  if (isNodeProject) {
+    logger.info("   Node.js: https://nodejs.org/docs");
+  }
+  logger.info("");
+  logger.info("Happy coding! 🚀");
+}
+
+/**
+ * Check if a file exists
+ */
+async function fileExists(filePath: string): Promise<boolean> {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
   }
 }
 
