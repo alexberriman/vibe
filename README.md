@@ -21,6 +21,7 @@ vibe [command] [options]
 
 | Command                               | Category             | Description                                            |
 | ------------------------------------- | -------------------- | ------------------------------------------------------ |
+| [`scaffold`](#scaffold)               | 🚀 Project Setup     | Create new projects from pre-configured templates      |
 | [`storybook-urls`](#storybook-urls)   | 📱 Route Discovery   | Generate JSON arrays of Storybook story URLs           |
 | [`react-routes`](#react-routes)       | 📱 Route Discovery   | Discover all routes in React applications              |
 | [`nextjs-routes`](#nextjs-routes)     | 📱 Route Discovery   | Analyze Next.js apps and extract page/API routes       |
@@ -32,6 +33,45 @@ vibe [command] [options]
 | [`openai`](#openai)                   | 🤖 AI Assistance     | Prompt OpenAI/ChatGPT with structured JSON responses   |
 
 ## 🔥 Commands
+
+### 🚀 Project Setup
+
+#### `scaffold`
+Create new projects from pre-configured templates with intelligent prompts and automatic setup.
+
+```bash
+# Interactive mode - choose template and configure project
+npx @alexberriman/vibe scaffold
+
+# Quick React project with defaults
+npx @alexberriman/vibe scaffold --template vibe-react --output my-app --defaults
+
+# Non-interactive with all options
+npx @alexberriman/vibe scaffold \
+  --template vibe-react \
+  --output ./my-startup \
+  --project-name "my-startup" \
+  --description "The next big thing in SaaS" \
+  --author-name "John Doe" \
+  --license MIT
+
+# Preview mode (dry run)
+npx @alexberriman/vibe scaffold --template vibe-react --dry-run
+```
+
+**Available Templates:**
+- **vibe-react** - Modern React application with TypeScript, Vite, Tailwind CSS, Storybook, testing, and comprehensive tooling
+
+**Features:**
+- ⚡ Interactive template selection with descriptions
+- 📝 Smart prompts with validation (project name, author, license)
+- 🔄 Automatic file processing with placeholder replacement
+- 📦 Dependency installation and git repository initialization  
+- 🎯 Non-interactive mode for CI/automation
+- 🔍 Dry run mode for preview without execution
+- 🔧 Template development support with configuration system
+
+> 📚 **[Full Documentation](src/commands/scaffold/README.md)** - Complete guide with detailed examples and template creation.
 
 ### 📱 Route Discovery
 
