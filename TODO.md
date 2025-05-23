@@ -86,15 +86,15 @@ Create an interactive CLI tool to scaffold new "vibe coding" projects from templ
 
 ### Current Templates
 
-- [ ] Configure vibe-react template:
-  - [ ] Repository: git@github.com:alexberriman/vibe-react.git
-  - [ ] Create /Users/alexberriman/Documents/personal/vibe-react/scaffold.config.json with:
-    - [ ] Template metadata (name, description)
-    - [ ] Define prompts (projectName, description, author)
-    - [ ] Specify placeholder mappings for file processing
-    - [ ] Configure post-processing steps (npm install, etc.)
-  - [ ] Update /Users/alexberriman/Documents/personal/vibe-react/.gitignore to exclude scaffold-specific files
-  - [ ] Create /Users/alexberriman/Documents/personal/vibe-react/README.template.md for generated projects
+- [x] Configure vibe-react template:
+  - [x] Repository: git@github.com:alexberriman/vibe-react.git
+  - [x] Create /Users/alexberriman/Documents/personal/vibe-react/scaffold.config.json with:
+    - [x] Template metadata (name, description)
+    - [x] Define prompts (projectName, description, author)
+    - [x] Specify placeholder mappings for file processing
+    - [x] Configure post-processing steps (npm install, etc.)
+  - [x] Update /Users/alexberriman/Documents/personal/vibe-react/.gitignore to exclude scaffold-specific files
+  - [x] Create /Users/alexberriman/Documents/personal/vibe-react/README.template.md for generated projects
 
 ### Documentation
 
