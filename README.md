@@ -268,3 +268,9 @@ Most commands support these common options:
 - `--filter <pattern>` (`-f`): Filter results by pattern
 - `--help`: Show command-specific help
 
+## 🧠 Claude Guidelines
+
+This project includes a collection of modular coding guidelines that can be combined to create project-specific AI assistant configurations. These guidelines ensure consistent, high-quality code generation across different technology stacks.
+
+> 📚 **[Browse Guidelines](claude/md/README.md)** - Select and combine guidelines for your project's needs.
+
