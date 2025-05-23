@@ -1,21 +1,27 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { PostProcessor } from "./post-processor.js";
 import type { PostProcessingStep } from "./template-registry.js";
+import tsResults from "ts-results";
+const { Ok } = tsResults;
 
-// Mock CommandRunner
-vi.mock("../../utils/command-runner.js", () => ({
-  CommandRunner: vi.fn().mockImplementation(() => ({
-    run: vi.fn().mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" }),
-  })),
-}));
+// Mock runCommand
+vi.mock("../../utils/command-runner.js", async () => {
+  const tsResults = await import("ts-results");
+  const { Ok } = tsResults.default;
+  return {
+    runCommand: vi.fn().mockResolvedValue(Ok({ exitCode: 0, stdout: "", stderr: "" })),
+  };
+});
 
 // Mock ProgressIndicator
 vi.mock("../../utils/progress-indicator.js", () => ({
   ProgressIndicator: vi.fn().mockImplementation(() => ({
-    start: vi.fn(),
+    increment: vi.fn(),
     update: vi.fn(),
     complete: vi.fn(),
-    fail: vi.fn(),
+    setTotal: vi.fn(),
+    reset: vi.fn(),
+    getPercentage: vi.fn(),
   })),
 }));
 
@@ -35,9 +41,7 @@ describe("PostProcessor", () => {
   });
 
   it("should handle empty post-processing steps", async () => {
-    await expect(
-      postProcessor.runPostProcessing("/test/path", [])
-    ).resolves.not.toThrow();
+    await expect(postProcessor.runPostProcessing("/test/path", [])).resolves.not.toThrow();
   });
 
   it("should handle dry-run mode", async () => {
@@ -55,8 +59,7 @@ describe("PostProcessor", () => {
   });
 
   it("should run command steps", async () => {
-    const mockRun = vi.fn().mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
-    (postProcessor as any).commandRunner.run = mockRun;
+    const { runCommand } = await import("../../utils/command-runner.js");
 
     const steps: PostProcessingStep[] = [
       {
@@ -67,16 +70,14 @@ describe("PostProcessor", () => {
 
     await postProcessor.runPostProcessing("/test/path", steps);
 
-    expect(mockRun).toHaveBeenCalledWith({
-      command: "echo",
-      args: ["hello"],
-      cwd: "/test/path",
+    expect(runCommand).toHaveBeenCalledWith({
+      command: 'cd "/test/path" && echo hello',
+      logger: expect.any(Object),
     });
   });
 
   it("should handle npm install specially", async () => {
-    const mockRun = vi.fn().mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
-    (postProcessor as any).commandRunner.run = mockRun;
+    const { runCommand } = await import("../../utils/command-runner.js");
 
     const steps: PostProcessingStep[] = [
       {
@@ -87,22 +88,17 @@ describe("PostProcessor", () => {
 
     await postProcessor.runPostProcessing("/test/path", steps);
 
-    expect(mockRun).toHaveBeenCalledWith(
-      expect.objectContaining({
-        command: "npm",
-        args: ["install"],
-        cwd: "/test/path",
-      })
-    );
+    expect(runCommand).toHaveBeenCalledWith({
+      command: 'cd "/test/path" && npm install',
+      logger: expect.any(Object),
+    });
   });
 
   it("should handle command failures", async () => {
-    const mockRun = vi.fn().mockResolvedValue({ 
-      exitCode: 1, 
-      stdout: "", 
-      stderr: "Command failed" 
-    });
-    (postProcessor as any).commandRunner.run = mockRun;
+    const { runCommand } = await import("../../utils/command-runner.js");
+    vi.mocked(runCommand).mockResolvedValue(
+      Ok({ exitCode: 1, stdout: "", stderr: "Command failed" })
+    );
 
     const steps: PostProcessingStep[] = [
       {
@@ -111,14 +107,16 @@ describe("PostProcessor", () => {
       },
     ];
 
-    await expect(
-      postProcessor.runPostProcessing("/test/path", steps)
-    ).rejects.toThrow("Command failed: false");
+    await expect(postProcessor.runPostProcessing("/test/path", steps)).rejects.toThrow(
+      "Command failed: false"
+    );
   });
 
   it("should run script steps", async () => {
-    const mockRun = vi.fn().mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
-    (postProcessor as any).commandRunner.run = mockRun;
+    const { runCommand } = await import("../../utils/command-runner.js");
+
+    // Reset mock to return success for this test
+    vi.mocked(runCommand).mockResolvedValue(Ok({ exitCode: 0, stdout: "", stderr: "" }));
 
     const steps: PostProcessingStep[] = [
       {
@@ -129,10 +127,9 @@ describe("PostProcessor", () => {
 
     await postProcessor.runPostProcessing("/test/path", steps);
 
-    expect(mockRun).toHaveBeenCalledWith({
-      command: "node",
-      args: ["/test/path/setup.js"],
-      cwd: "/test/path",
+    expect(runCommand).toHaveBeenCalledWith({
+      command: 'cd "/test/path" && node "/test/path/setup.js"',
+      logger: expect.any(Object),
     });
   });
 });

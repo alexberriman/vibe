@@ -8,7 +8,6 @@ import { templateRegistry } from "./template-registry.js";
 import { cloneTemplate, initializeRepository } from "./git-operations.js";
 import { processTemplate } from "./template-processor.js";
 import { runPostProcessing, getDefaultPostProcessingSteps } from "./post-processor.js";
-import { validateTemplate } from "./template-validator.js";
 
 export interface ScaffoldOptions {
   template?: string;
@@ -21,6 +20,7 @@ export interface ScaffoldOptions {
   description?: string;
   author?: string;
   email?: string;
+  license?: string;
 }
 
 export async function scaffoldCommand(options: ScaffoldOptions): Promise<void> {
@@ -48,6 +48,7 @@ export async function scaffoldCommand(options: ScaffoldOptions): Promise<void> {
         description: options.description,
         authorName: options.author,
         authorEmail: options.email,
+        license: options.license,
         outputDirectory: options.output ? path.resolve(options.output) : undefined,
         confirmOverwrite: options.force,
       };
@@ -91,6 +92,7 @@ export async function scaffoldCommand(options: ScaffoldOptions): Promise<void> {
         description: options.description || "A new project",
         authorName: options.author || "",
         authorEmail: options.email || "",
+        license: options.license || "MIT",
         outputDirectory: path.resolve(options.output || path.join(process.cwd(), options.name)),
         confirmOverwrite: options.force,
       };
@@ -115,12 +117,12 @@ export async function scaffoldCommand(options: ScaffoldOptions): Promise<void> {
         logger.error("Use --force to overwrite or choose a different directory");
         process.exit(1);
       }
-      
+
       if (scaffoldConfig.confirmOverwrite) {
         logger.info("Removing existing directory...");
         await fs.rm(scaffoldConfig.outputDirectory, { recursive: true, force: true });
       }
-    } catch (error) {
+    } catch {
       // Directory doesn't exist, which is fine
     }
 
@@ -192,6 +194,7 @@ export function createScaffoldCommand(): Command {
     .option("-d, --description <description>", "Project description")
     .option("-a, --author <name>", "Author name")
     .option("-e, --email <email>", "Author email")
+    .option("-l, --license <license>", "Project license (MIT, Apache-2.0, GPL-3.0, etc.)")
     .option("-o, --output <path>", "Output directory (defaults to ./<project-name>)")
     .option("-f, --force", "Overwrite existing directory", false)
     .option("--defaults", "Use default values for optional prompts", false)

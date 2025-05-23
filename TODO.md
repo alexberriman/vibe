@@ -33,9 +33,9 @@ Create an interactive CLI tool to scaffold new "vibe coding" projects from templ
   - [x] Project name prompt with validation (valid npm package name)
   - [x] Project description prompt
   - [x] Author name/email prompts (with git config defaults)
-  - [ ] License selection prompt
+  - [x] License selection prompt
   - [ ] Additional template-specific prompts
-- [ ] Build confirmation prompt showing selected options before scaffolding
+- [x] Build confirmation prompt showing selected options before scaffolding
 - [x] Add directory selection/creation prompt with conflict detection
 
 ### Non-Interactive Mode (CI Support)
@@ -49,11 +49,11 @@ Create an interactive CLI tool to scaffold new "vibe coding" projects from templ
 ### Scaffolding Process
 
 - [x] Create temporary directory management for safe operations (use node:fs/promises)
-- [ ] Implement git clone functionality with progress tracking:
-  - [ ] Use simple-git library for git operations
-  - [ ] Add support for specific branch/tag selection
-  - [ ] Handle authentication for private repositories
-  - [ ] Integrate with existing progress-indicator.ts for clone progress
+- [x] Implement git clone functionality with progress tracking:
+  - [x] Use simple-git library for git operations
+  - [x] Add support for specific branch/tag selection
+  - [x] Handle authentication for private repositories
+  - [x] Integrate with existing progress-indicator.ts for clone progress
 - [ ] Build file processing engine:
   - [ ] Implement placeholder replacement system ({{projectName}}, {{description}}, etc.)
   - [ ] Create package.json modification logic (name, description, author, etc.)
@@ -64,13 +64,13 @@ Create an interactive CLI tool to scaffold new "vibe coding" projects from templ
   - [ ] Create default README template with project information
   - [ ] Add sections based on template type
   - [ ] Include getting started instructions
-- [ ] Create git repository initialization:
-  - [ ] Remove existing .git directory from cloned template
-  - [ ] Initialize fresh git repository
-  - [ ] Configure git with user information
-  - [ ] Stage all files
-  - [ ] Create initial commit with --no-verify flag
-  - [ ] Use command-runner.ts utility for git commands
+- [x] Create git repository initialization:
+  - [x] Remove existing .git directory from cloned template
+  - [x] Initialize fresh git repository
+  - [x] Configure git with user information
+  - [x] Stage all files
+  - [x] Create initial commit with --no-verify flag
+  - [x] Use command-runner.ts utility for git commands
 - [ ] Add post-processing hooks:
   - [ ] Run npm install if package.json exists
   - [ ] Execute template-specific setup scripts

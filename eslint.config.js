@@ -34,6 +34,8 @@ export default [
         setInterval: "readonly",
         clearInterval: "readonly",
         clearTimeout: "readonly",
+        Buffer: "readonly",
+        NodeJS: "readonly",
 
         // Browser globals
         document: "readonly",

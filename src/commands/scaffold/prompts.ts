@@ -11,6 +11,7 @@ export interface ScaffoldPromptAnswers {
   description: string;
   authorName: string;
   authorEmail: string;
+  license: string;
   outputDirectory: string;
   confirmOverwrite?: boolean;
 }
@@ -114,6 +115,39 @@ export function createOutputDirectoryPrompt(projectName: string): PromptObject {
   };
 }
 
+// License options
+const LICENSE_CHOICES = [
+  { title: "MIT License", value: "MIT", description: "Permissive license with good compatibility" },
+  {
+    title: "Apache License 2.0",
+    value: "Apache-2.0",
+    description: "Permissive with patent protection",
+  },
+  { title: "GNU General Public License v3.0", value: "GPL-3.0", description: "Copyleft license" },
+  {
+    title: "BSD 3-Clause License",
+    value: "BSD-3-Clause",
+    description: "Permissive with attribution",
+  },
+  { title: "The Unlicense", value: "Unlicense", description: "Public domain dedication" },
+  { title: "ISC License", value: "ISC", description: "Simplified permissive license" },
+  { title: "Mozilla Public License 2.0", value: "MPL-2.0", description: "Weak copyleft license" },
+];
+
+// Create license selection prompt
+export function createLicensePrompt(initialValue?: string): PromptObject {
+  return {
+    type: "select",
+    name: "license",
+    message: "Select a license for your project",
+    choices: LICENSE_CHOICES.map((choice) => ({
+      title: `${choice.title} - ${choice.description}`,
+      value: choice.value,
+    })),
+    initial: LICENSE_CHOICES.findIndex((choice) => choice.value === (initialValue || "MIT")),
+  };
+}
+
 // Create overwrite confirmation prompt
 export function createOverwritePrompt(directory: string): PromptObject {
   return {
@@ -121,6 +155,30 @@ export function createOverwritePrompt(directory: string): PromptObject {
     name: "confirmOverwrite",
     message: `Directory ${directory} already exists. Overwrite?`,
     initial: false,
+  };
+}
+
+// Create configuration confirmation prompt
+export function createConfirmationPrompt(
+  config: Omit<ScaffoldPromptAnswers, "confirmOverwrite">
+): PromptObject {
+  const templateInfo = templateRegistry.getTemplate(config.template);
+
+  return {
+    type: "confirm",
+    name: "confirmConfiguration",
+    message: [
+      "\nReview your configuration:",
+      `  Template: ${config.template} (${templateInfo?.description || "Unknown"})`,
+      `  Project: ${config.projectName}`,
+      `  Description: ${config.description}`,
+      `  Author: ${config.authorName} <${config.authorEmail}>`,
+      `  License: ${config.license}`,
+      `  Output: ${config.outputDirectory}`,
+      "",
+      "Create project with these settings?",
+    ].join("\n"),
+    initial: true,
   };
 }
 
@@ -140,6 +198,11 @@ export async function runInteractivePrompts(
 
   // Project details
   questions.push(createProjectNamePrompt(options.projectName), createDescriptionPrompt());
+
+  // License selection (if not provided)
+  if (!options.license) {
+    questions.push(createLicensePrompt());
+  }
 
   // Author information
   if (!options.authorName) {
@@ -196,14 +259,34 @@ export async function runInteractivePrompts(
     confirmOverwrite = overwriteAnswer.confirmOverwrite;
   }
 
-  // Combine all answers
-  return {
+  // Build configuration
+  const config = {
     template: options.template || initialAnswers.template,
     projectName: initialAnswers.projectName || options.projectName || "",
     description: initialAnswers.description || options.description || "",
     authorName: initialAnswers.authorName || options.authorName || gitName || "",
     authorEmail: initialAnswers.authorEmail || options.authorEmail || gitEmail || "",
+    license: initialAnswers.license || options.license || "MIT",
     outputDirectory: outputPath,
+  };
+
+  // Show confirmation prompt
+  const confirmationAnswer = await prompts(createConfirmationPrompt(config), {
+    onCancel: () => {
+      return false;
+    },
+  });
+
+  if (
+    confirmationAnswer.confirmConfiguration === undefined ||
+    !confirmationAnswer.confirmConfiguration
+  ) {
+    return null;
+  }
+
+  // Return final configuration
+  return {
+    ...config,
     confirmOverwrite,
   };
 }

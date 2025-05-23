@@ -3,11 +3,21 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 // Mock the modules before imports
 vi.mock("../../utils/logger.js");
 vi.mock("./prompts.js");
+vi.mock("./template-registry.js");
+vi.mock("./git-operations.js");
+vi.mock("./template-processor.js");
+vi.mock("./post-processor.js");
+vi.mock("node:fs/promises");
 
 import { scaffoldCommand, createScaffoldCommand } from "./scaffold";
 import type { ScaffoldOptions } from "./scaffold";
 import { createLogger } from "../../utils/logger.js";
 import { runInteractivePrompts, getTemplateInfo, getAllTemplates } from "./prompts.js";
+import { templateRegistry } from "./template-registry.js";
+import { cloneTemplate, initializeRepository } from "./git-operations.js";
+import { processTemplate } from "./template-processor.js";
+import { runPostProcessing, getDefaultPostProcessingSteps } from "./post-processor.js";
+import * as fs from "node:fs/promises";
 
 // Setup mocks
 const mockLogger = {
@@ -42,6 +52,32 @@ describe("scaffold command", () => {
         repository: "git@github.com:alexberriman/vibe-react.git",
       },
     ]);
+
+    // Mock templateRegistry
+    vi.mocked(templateRegistry.loadTemplateConfig).mockResolvedValue({
+      name: "vibe-react",
+      description: "Modern React application",
+      repository: "git@github.com:alexberriman/vibe-react.git",
+      placeholders: {
+        PROJECT_NAME: "projectName",
+        PROJECT_DESCRIPTION: "description",
+      },
+    });
+
+    // Mock git operations
+    vi.mocked(cloneTemplate).mockResolvedValue(undefined);
+    vi.mocked(initializeRepository).mockResolvedValue(undefined);
+
+    // Mock template processor
+    vi.mocked(processTemplate).mockResolvedValue(undefined);
+
+    // Mock post processor
+    vi.mocked(runPostProcessing).mockResolvedValue(undefined);
+    vi.mocked(getDefaultPostProcessingSteps).mockReturnValue([]);
+
+    // Mock fs operations
+    vi.mocked(fs.stat).mockRejectedValue(new Error("Not found"));
+    vi.mocked(fs.rm).mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -58,6 +94,7 @@ describe("scaffold command", () => {
           description: "Test project",
           authorName: "Test Author",
           authorEmail: "test@example.com",
+          license: "MIT",
           outputDirectory: "/path/to/output",
           confirmOverwrite: true,
         };
@@ -221,7 +258,7 @@ describe("scaffold command", () => {
       const command = createScaffoldCommand();
       const options = command.options;
 
-      expect(options).toHaveLength(10); // Updated count
+      expect(options).toHaveLength(11); // Updated count for license option
 
       const optionFlags = options.map((opt) => opt.flags);
       expect(optionFlags).toContain("-t, --template <name>");
@@ -229,6 +266,7 @@ describe("scaffold command", () => {
       expect(optionFlags).toContain("-d, --description <description>");
       expect(optionFlags).toContain("-a, --author <name>");
       expect(optionFlags).toContain("-e, --email <email>");
+      expect(optionFlags).toContain("-l, --license <license>");
       expect(optionFlags).toContain("-o, --output <path>");
       expect(optionFlags).toContain("-f, --force");
       expect(optionFlags).toContain("--defaults");

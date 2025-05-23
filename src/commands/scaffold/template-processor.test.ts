@@ -42,6 +42,7 @@ Year: {{year}}`;
       description: "An awesome project",
       authorName: "John Doe",
       authorEmail: "john@example.com",
+      license: "MIT",
       outputDirectory: targetDir,
     };
 
@@ -70,10 +71,7 @@ Year: {{year}}`;
       author: "{{authorName}} <{{authorEmail}}>",
     };
 
-    await fs.writeFile(
-      path.join(sourceDir, "package.json"),
-      JSON.stringify(packageJson, null, 2)
-    );
+    await fs.writeFile(path.join(sourceDir, "package.json"), JSON.stringify(packageJson, null, 2));
 
     const answers: ScaffoldPromptAnswers = {
       template: "test-template",
@@ -81,6 +79,7 @@ Year: {{year}}`;
       description: "My test project",
       authorName: "Jane Doe",
       authorEmail: "jane@example.com",
+      license: "MIT",
       outputDirectory: targetDir,
     };
 
@@ -113,6 +112,7 @@ Year: {{year}}`;
       description: "Test project",
       authorName: "Test",
       authorEmail: "test@example.com",
+      license: "MIT",
       outputDirectory: targetDir,
     };
 
@@ -142,6 +142,7 @@ Year: {{year}}`;
       description: "Test project",
       authorName: "Test",
       authorEmail: "test@example.com",
+      license: "MIT",
       outputDirectory: targetDir,
     };
 
@@ -161,10 +162,7 @@ Year: {{year}}`;
   });
 
   it("should use custom placeholders from config", async () => {
-    await fs.writeFile(
-      path.join(sourceDir, "config.js"),
-      "export const API_URL = '{{apiUrl}}';"
-    );
+    await fs.writeFile(path.join(sourceDir, "config.js"), "export const API_URL = '{{apiUrl}}';");
 
     const answers: ScaffoldPromptAnswers = {
       template: "test-template",
@@ -172,6 +170,7 @@ Year: {{year}}`;
       description: "Test project",
       authorName: "Test",
       authorEmail: "test@example.com",
+      license: "MIT",
       outputDirectory: targetDir,
     };
 
@@ -199,6 +198,7 @@ Year: {{year}}`;
       description: "Test project",
       authorName: "Test",
       authorEmail: "test@example.com",
+      license: "MIT",
       outputDirectory: targetDir,
     };
 

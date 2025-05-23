@@ -1,6 +1,7 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import * as os from "node:os";
+import { rmSync } from "node:fs";
 import { createLogger } from "../../utils/logger.js";
 
 export interface TempDirOptions {
@@ -36,7 +37,7 @@ export class TempDirManager {
       return tempDir;
     } catch (error) {
       this.logger.error("Failed to create temporary directory", error);
-      throw new Error(`Failed to create temporary directory: ${error}`);
+      throw new Error(`Failed to create temporary directory: ${error as Error}`);
     }
   }
 
@@ -45,16 +46,22 @@ export class TempDirManager {
    */
   async cleanupDir(tempDir: string): Promise<void> {
     if (!this.tempDirs.has(tempDir)) {
-      this.logger.debug(`Directory not managed by TempDirManager: ${tempDir}`);
+      if (this.logger) {
+        this.logger.debug(`Directory not managed by TempDirManager: ${tempDir}`);
+      }
       return;
     }
 
     try {
       await fs.rm(tempDir, { recursive: true, force: true });
       this.tempDirs.delete(tempDir);
-      this.logger.debug(`Cleaned up temporary directory: ${tempDir}`);
+      if (this.logger) {
+        this.logger.debug(`Cleaned up temporary directory: ${tempDir}`);
+      }
     } catch (error) {
-      this.logger.error(`Failed to clean up temporary directory: ${tempDir}`, error);
+      if (this.logger) {
+        this.logger.error(`Failed to clean up temporary directory: ${tempDir}`, error);
+      }
       // Don't throw - best effort cleanup
     }
   }
@@ -63,12 +70,12 @@ export class TempDirManager {
    * Clean up all temporary directories
    */
   async cleanupAll(): Promise<void> {
-    this.logger.debug(`Cleaning up ${this.tempDirs.size} temporary directories`);
-    
-    const cleanupPromises = Array.from(this.tempDirs).map((dir) =>
-      this.cleanupDir(dir)
-    );
-    
+    if (this.logger) {
+      this.logger.debug(`Cleaning up ${this.tempDirs.size} temporary directories`);
+    }
+
+    const cleanupPromises = Array.from(this.tempDirs).map((dir) => this.cleanupDir(dir));
+
     await Promise.all(cleanupPromises);
   }
 
@@ -80,11 +87,9 @@ export class TempDirManager {
       return;
     }
 
-    const cleanup = async () => {
+    const cleanup = async (): Promise<void> => {
       // Clean up all managers
-      const cleanupPromises = Array.from(allTempDirManagers).map((manager) =>
-        manager.cleanupAll()
-      );
+      const cleanupPromises = Array.from(allTempDirManagers).map((manager) => manager.cleanupAll());
       await Promise.all(cleanupPromises);
     };
 
@@ -95,10 +100,11 @@ export class TempDirManager {
         for (const dir of manager.tempDirs) {
           try {
             // Use sync methods in exit handler
-            const rmSync = require("fs").rmSync;
             rmSync(dir, { recursive: true, force: true });
-            manager.logger.debug(`Cleaned up on exit: ${dir}`);
-          } catch (error) {
+            if (manager.logger) {
+              manager.logger.debug(`Cleaned up on exit: ${dir}`);
+            }
+          } catch {
             // Ignore errors during exit cleanup
           }
         }
@@ -106,7 +112,7 @@ export class TempDirManager {
     });
 
     // Handle termination signals
-    const signals: NodeJS.Signals[] = ["SIGINT", "SIGTERM", "SIGHUP"];
+    const signals: readonly NodeJS.Signals[] = ["SIGINT", "SIGTERM", "SIGHUP"] as const;
     signals.forEach((signal) => {
       process.once(signal, async () => {
         await cleanup();
@@ -116,14 +122,14 @@ export class TempDirManager {
 
     // Handle uncaught exceptions
     process.once("uncaughtException", async (error) => {
-      this.logger.error("Uncaught exception", error);
+      console.error("Uncaught exception", error);
       await cleanup();
       process.exit(1);
     });
 
     // Handle unhandled promise rejections
     process.once("unhandledRejection", async (reason) => {
-      this.logger.error("Unhandled rejection", reason);
+      console.error("Unhandled rejection", reason);
       await cleanup();
       process.exit(1);
     });

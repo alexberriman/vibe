@@ -4,15 +4,22 @@ import * as path from "node:path";
 import * as os from "node:os";
 import { GitOperations } from "./git-operations.js";
 import { simpleGit } from "simple-git";
+import type { SimpleGit } from "simple-git";
 
 // Mock simple-git
+const mockGetConfig = vi.fn();
+const mockClone = vi.fn();
+const mockInit = vi.fn();
+const mockAdd = vi.fn();
+const mockAddConfig = vi.fn();
+
 vi.mock("simple-git", () => ({
   simpleGit: vi.fn(() => ({
-    clone: vi.fn(),
-    init: vi.fn(),
-    add: vi.fn(),
-    addConfig: vi.fn(),
-    getConfig: vi.fn(),
+    clone: mockClone,
+    init: mockInit,
+    add: mockAdd,
+    addConfig: mockAddConfig,
+    getConfig: mockGetConfig,
     outputHandler: vi.fn(),
   })),
 }));
@@ -54,16 +61,23 @@ describe("GitOperations", () => {
   });
 
   it("should get git config values", async () => {
-    const mockGit = simpleGit();
-    (mockGit.getConfig as any).mockResolvedValue({ value: "John Doe" });
+    const scopesMap = new Map<string, string[]>();
+    scopesMap.set("global", ["~/.gitconfig"]);
+
+    mockGetConfig.mockResolvedValue({
+      key: "user.name",
+      value: "John Doe",
+      values: ["John Doe"],
+      paths: ["~/.gitconfig"],
+      scopes: scopesMap,
+    });
 
     const value = await gitOps.getGitConfig("user.name");
     expect(value).toBe("John Doe");
   });
 
   it("should return null for missing git config", async () => {
-    const mockGit = simpleGit();
-    (mockGit.getConfig as any).mockRejectedValue(new Error("Not found"));
+    mockGetConfig.mockRejectedValue(new Error("Not found"));
 
     const value = await gitOps.getGitConfig("user.missing");
     expect(value).toBeNull();
