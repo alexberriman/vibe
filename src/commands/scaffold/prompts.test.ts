@@ -147,11 +147,12 @@ describe("prompts", () => {
   describe("getTemplateInfo", () => {
     it("should return template info for valid name", () => {
       const template = getTemplateInfo("vibe-react");
-      expect(template).toEqual({
-        name: "vibe-react",
-        description: "Modern React application with TypeScript, Vite, and Tailwind CSS",
-        repository: "git@github.com:alexberriman/vibe-react.git",
-      });
+      expect(template).toBeDefined();
+      expect(template?.name).toBe("vibe-react");
+      expect(template?.description).toBe(
+        "Modern React application with TypeScript, Vite, and Tailwind CSS"
+      );
+      expect(template?.repository).toBe("git@github.com:alexberriman/vibe-react.git");
     });
 
     it("should return undefined for unknown template", () => {

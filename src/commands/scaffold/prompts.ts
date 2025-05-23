@@ -3,12 +3,7 @@ import type { PromptObject } from "prompts";
 import { simpleGit } from "simple-git";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-
-export interface TemplateInfo {
-  name: string;
-  description: string;
-  repository: string;
-}
+import { templateRegistry } from "./template-registry.js";
 
 export interface ScaffoldPromptAnswers {
   template: string;
@@ -19,15 +14,6 @@ export interface ScaffoldPromptAnswers {
   outputDirectory: string;
   confirmOverwrite?: boolean;
 }
-
-// Available templates registry
-const TEMPLATES: TemplateInfo[] = [
-  {
-    name: "vibe-react",
-    description: "Modern React application with TypeScript, Vite, and Tailwind CSS",
-    repository: "git@github.com:alexberriman/vibe-react.git",
-  },
-];
 
 // Validate npm package name
 export function isValidPackageName(name: string): boolean {
@@ -59,13 +45,14 @@ async function directoryExists(dirPath: string): Promise<boolean> {
 
 // Create template selection prompt
 export function createTemplatePrompt(): PromptObject {
+  const templateChoices = templateRegistry.getTemplateChoices();
   return {
     type: "select",
     name: "template",
     message: "Select a project template",
-    choices: TEMPLATES.map((template) => ({
-      title: `${template.name} - ${template.description}`,
-      value: template.name,
+    choices: templateChoices.map((choice) => ({
+      title: `${choice.title} - ${choice.description}`,
+      value: choice.value,
     })),
   };
 }
@@ -222,11 +209,11 @@ export async function runInteractivePrompts(
 }
 
 // Get template info by name
-export function getTemplateInfo(name: string): TemplateInfo | undefined {
-  return TEMPLATES.find((template) => template.name === name);
+export function getTemplateInfo(name: string): ReturnType<typeof templateRegistry.getTemplate> {
+  return templateRegistry.getTemplate(name);
 }
 
 // Get all available templates
-export function getAllTemplates(): TemplateInfo[] {
-  return TEMPLATES;
+export function getAllTemplates(): ReturnType<typeof templateRegistry.getAllTemplates> {
+  return templateRegistry.getAllTemplates();
 }
