@@ -54,12 +54,13 @@ Create an interactive CLI tool to scaffold new "vibe coding" projects from templ
   - [x] Add support for specific branch/tag selection
   - [x] Handle authentication for private repositories
   - [x] Integrate with existing progress-indicator.ts for clone progress
-- [ ] Build file processing engine:
-  - [ ] Implement placeholder replacement system ({{projectName}}, {{description}}, etc.)
-  - [ ] Create package.json modification logic (name, description, author, etc.)
-  - [ ] Add support for renaming files based on project name
-  - [ ] Build template file processor for any file type
-  - [ ] Use globby (already in dependencies) for file pattern matching
+- [x] Build file processing engine:
+  - [x] Implement placeholder replacement system ({{projectName}}, {{description}}, etc.)
+  - [x] Create package.json modification logic (name, description, author, license, etc.)
+  - [x] Add support for renaming files based on project name
+  - [x] Build template file processor for any file type
+  - [x] Use globby (already in dependencies) for file pattern matching
+  - [x] Add advanced placeholder transformations (kebab-case, camelCase, PascalCase, snake_case, etc.)
 - [ ] Implement README.md generation:
   - [ ] Create default README template with project information
   - [ ] Add sections based on template type

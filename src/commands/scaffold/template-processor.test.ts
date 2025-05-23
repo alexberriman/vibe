@@ -214,4 +214,92 @@ Year: {{year}}`;
     const files = await fs.readdir(targetDir);
     expect(files).toHaveLength(0);
   });
+
+  it("should handle advanced placeholder transformations", async () => {
+    const templateContent = `
+Project: {{projectName}}
+Kebab: {{projectName.kebab}}
+Camel: {{projectName.camel}}
+Pascal: {{projectName.pascal}}
+Snake: {{projectName.snake}}
+Upper: {{projectName.upper}}
+Lower: {{projectName.lower}}
+`;
+
+    await fs.writeFile(path.join(sourceDir, "transformations.txt"), templateContent);
+
+    const answers: ScaffoldPromptAnswers = {
+      template: "test-template",
+      projectName: "My Awesome Project",
+      description: "Test project",
+      authorName: "Test",
+      authorEmail: "test@example.com",
+      license: "MIT",
+      outputDirectory: targetDir,
+    };
+
+    const config: TemplateConfig = {
+      name: "test-template",
+      description: "Test template",
+      repository: "test-repo",
+    };
+
+    await processor.processTemplate(sourceDir, targetDir, answers, config);
+
+    const processedContent = await fs.readFile(
+      path.join(targetDir, "transformations.txt"),
+      "utf-8"
+    );
+
+    expect(processedContent).toContain("Project: My Awesome Project");
+    expect(processedContent).toContain("Kebab: my-awesome-project");
+    expect(processedContent).toContain("Camel: myAwesomeProject");
+    expect(processedContent).toContain("Pascal: MyAwesomeProject");
+    expect(processedContent).toContain("Snake: my_awesome_project");
+    expect(processedContent).toContain("Upper: MY AWESOME PROJECT");
+    expect(processedContent).toContain("Lower: my awesome project");
+  });
+
+  it("should process license field in package.json", async () => {
+    const packageJsonTemplate = {
+      name: "{{projectName}}",
+      version: "1.0.0",
+      description: "{{description}}",
+      author: "{{authorName}} <{{authorEmail}}>",
+      license: "ISC",
+    };
+
+    await fs.writeFile(
+      path.join(sourceDir, "package.json"),
+      JSON.stringify(packageJsonTemplate, null, 2)
+    );
+
+    const answers: ScaffoldPromptAnswers = {
+      template: "test-template",
+      projectName: "test-project",
+      description: "Test description",
+      authorName: "Test Author",
+      authorEmail: "test@example.com",
+      license: "Apache-2.0",
+      outputDirectory: targetDir,
+    };
+
+    const config: TemplateConfig = {
+      name: "test-template",
+      description: "Test template",
+      repository: "test-repo",
+    };
+
+    await processor.processTemplate(sourceDir, targetDir, answers, config);
+
+    const processedPackageJson = JSON.parse(
+      await fs.readFile(path.join(targetDir, "package.json"), "utf-8")
+    );
+
+    expect(processedPackageJson.name).toBe("test-project");
+    expect(processedPackageJson.license).toBe("Apache-2.0"); // Should be updated
+    expect(processedPackageJson.version).toBe("0.1.0"); // Should be reset
+    expect(processedPackageJson.description).toBe("Test description");
+    expect(processedPackageJson.author).toBe("Test Author <test@example.com>");
+  });
 });

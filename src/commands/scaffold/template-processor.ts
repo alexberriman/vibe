@@ -169,6 +169,11 @@ export class TemplateProcessor {
         }
       }
 
+      // Set license field
+      if (context.license) {
+        packageJson.license = context.license;
+      }
+
       // Set version to 0.1.0 for new projects
       packageJson.version = "0.1.0";
 
@@ -182,13 +187,34 @@ export class TemplateProcessor {
   }
 
   /**
-   * Replace placeholders in text
+   * Replace placeholders in text with advanced transformations
    */
   private replacePlaceholders(text: string, context: PlaceholderContext): string {
-    return text.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-      const value = context[key as keyof PlaceholderContext];
+    return text.replace(/\{\{(\w+(?:\.\w+)?)\}\}/g, (match, key) => {
+      // Handle transformation functions like {{projectName.kebab}}
+      const [mainKey, transform] = key.split(".");
+      const value = context[mainKey as keyof PlaceholderContext];
+
       if (value !== undefined) {
-        return String(value);
+        const stringValue = String(value);
+
+        // Apply transformation if specified
+        switch (transform) {
+          case "kebab":
+            return this.toKebabCase(stringValue);
+          case "camel":
+            return this.toCamelCase(stringValue);
+          case "pascal":
+            return this.toPascalCase(stringValue);
+          case "snake":
+            return this.toSnakeCase(stringValue);
+          case "upper":
+            return stringValue.toUpperCase();
+          case "lower":
+            return stringValue.toLowerCase();
+          default:
+            return stringValue;
+        }
       }
       return match;
     });
@@ -199,6 +225,44 @@ export class TemplateProcessor {
    */
   private processFilename(filename: string, context: PlaceholderContext): string {
     return this.replacePlaceholders(filename, context);
+  }
+
+  /**
+   * Convert string to kebab-case
+   */
+  private toKebabCase(str: string): string {
+    return str
+      .replace(/([a-z])([A-Z])/g, "$1-$2")
+      .replace(/[\s_]+/g, "-")
+      .toLowerCase();
+  }
+
+  /**
+   * Convert string to camelCase
+   */
+  private toCamelCase(str: string): string {
+    return str
+      .replace(/[-_\s]+(.)?/g, (_, char) => (char ? char.toUpperCase() : ""))
+      .replace(/^[A-Z]/, (char) => char.toLowerCase());
+  }
+
+  /**
+   * Convert string to PascalCase
+   */
+  private toPascalCase(str: string): string {
+    return str
+      .replace(/[-_\s]+(.)?/g, (_, char) => (char ? char.toUpperCase() : ""))
+      .replace(/^[a-z]/, (char) => char.toUpperCase());
+  }
+
+  /**
+   * Convert string to snake_case
+   */
+  private toSnakeCase(str: string): string {
+    return str
+      .replace(/([a-z])([A-Z])/g, "$1_$2")
+      .replace(/[\s-]+/g, "_")
+      .toLowerCase();
   }
 
   /**
