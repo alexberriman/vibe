@@ -23,8 +23,6 @@ Create an interactive CLI tool to scaffold new "vibe coding" projects from templ
 - [x] Create template registry that maps template names to git repositories
 - [x] Implement template metadata structure (name, description, prompts, placeholders)
 - [x] Build template validation to ensure required files and structure exist
-- [ ] Add support for template-specific post-processing scripts
-- [ ] Create template caching mechanism to avoid re-cloning frequently used templates
 
 ### Interactive Mode
 
@@ -34,7 +32,6 @@ Create an interactive CLI tool to scaffold new "vibe coding" projects from templ
   - [x] Project description prompt
   - [x] Author name/email prompts (with git config defaults)
   - [x] License selection prompt
-  - [ ] Additional template-specific prompts
 - [x] Build confirmation prompt showing selected options before scaffolding
 - [x] Add directory selection/creation prompt with conflict detection
 
@@ -84,8 +81,8 @@ Create an interactive CLI tool to scaffold new "vibe coding" projects from templ
 
 ### Error Handling & Recovery
 
-- [ ] Implement basic error handling with descriptive messages
-- [ ] Clean up temporary files on error or cancellation
+- [x] Implement comprehensive error handling with descriptive messages
+- [x] Clean up temporary files on error or cancellation
 
 ### Current Templates
 
@@ -101,9 +98,7 @@ Create an interactive CLI tool to scaffold new "vibe coding" projects from templ
 
 ### Documentation
 
-- [ ] Create detailed command README.md with usage examples
-- [ ] Document template configuration format
-- [ ] Add guide for creating new templates
+- [ ] Create detailed nested command README.md with usage examples
 - [ ] Update root README.md with scaffold command information
 
 ### Dependencies to Add

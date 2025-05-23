@@ -10,6 +10,7 @@ import type { Logger } from "pino";
 import { cloneTemplate, initializeRepository } from "./git-operations.js";
 import { processTemplate } from "./template-processor.js";
 import { runPostProcessing, getDefaultPostProcessingSteps } from "./post-processor.js";
+import { ErrorHandler, ScaffoldErrorType, ScaffoldError } from "./error-handler.js";
 
 export interface ScaffoldOptions {
   template?: string;
@@ -27,6 +28,13 @@ export interface ScaffoldOptions {
 
 export async function scaffoldCommand(options: ScaffoldOptions): Promise<void> {
   const logger = createLogger({ level: options.verbose ? "debug" : "info" });
+  const errorHandler = new ErrorHandler(options.verbose);
+  let currentContext = ErrorHandler.createContext("initialization");
+
+  // Handle user cancellation
+  process.on("SIGINT", async () => {
+    await errorHandler.handleCancellation(currentContext);
+  });
 
   try {
     logger.info("Starting project scaffolding...");
@@ -39,6 +47,8 @@ export async function scaffoldCommand(options: ScaffoldOptions): Promise<void> {
 
     // Check if we're in interactive mode
     const isInteractive = !options.template || !options.name;
+
+    currentContext = ErrorHandler.createContext("prompt-handling");
 
     if (isInteractive) {
       logger.info("Running in interactive mode");
@@ -56,35 +66,46 @@ export async function scaffoldCommand(options: ScaffoldOptions): Promise<void> {
       };
 
       // Run interactive prompts
-      const answers = await runInteractivePrompts(promptOptions);
+      const answers = await errorHandler.wrapOperation(
+        () => runInteractivePrompts(promptOptions),
+        currentContext
+      );
 
       if (!answers) {
-        logger.info("Scaffolding cancelled by user");
-        process.exit(0);
+        await errorHandler.handleCancellation(currentContext);
+        return;
       }
 
       scaffoldConfig = answers;
     } else {
       // Non-interactive mode - validate required options
       if (!options.template) {
-        logger.error("Template is required in non-interactive mode");
-        process.exit(1);
+        throw new ScaffoldError(
+          ScaffoldErrorType.VALIDATION_ERROR,
+          "Template is required in non-interactive mode",
+          currentContext
+        );
       }
 
       if (!options.name) {
-        logger.error("Project name is required in non-interactive mode");
-        process.exit(1);
+        throw new ScaffoldError(
+          ScaffoldErrorType.VALIDATION_ERROR,
+          "Project name is required in non-interactive mode",
+          currentContext
+        );
       }
 
       // Validate template exists
       const templateInfo = getTemplateInfo(options.template);
       if (!templateInfo) {
-        logger.error(`Unknown template: ${options.template}`);
-        logger.info("Available templates:");
-        getAllTemplates().forEach((t) => {
-          logger.info(`  - ${t.name}: ${t.description}`);
-        });
-        process.exit(1);
+        const availableTemplates = getAllTemplates()
+          .map((t) => `  - ${t.name}: ${t.description}`)
+          .join("\n");
+        throw new ScaffoldError(
+          ScaffoldErrorType.VALIDATION_ERROR,
+          `Unknown template: ${options.template}\n\nAvailable templates:\n${availableTemplates}`,
+          currentContext
+        );
       }
 
       // Build config from CLI options
@@ -100,6 +121,12 @@ export async function scaffoldCommand(options: ScaffoldOptions): Promise<void> {
       };
     }
 
+    // Update context with configuration
+    currentContext = ErrorHandler.createContext("directory-setup", {
+      template: scaffoldConfig.template,
+      outputDirectory: scaffoldConfig.outputDirectory,
+    });
+
     // Log the configuration
     logger.info("Scaffolding configuration:");
     logger.info(`  Template: ${scaffoldConfig.template}`);
@@ -112,68 +139,132 @@ export async function scaffoldCommand(options: ScaffoldOptions): Promise<void> {
     }
 
     // Check if output directory exists
-    try {
-      const stats = await fs.stat(scaffoldConfig.outputDirectory);
-      if (stats.isDirectory() && !scaffoldConfig.confirmOverwrite) {
-        logger.error(`Directory already exists: ${scaffoldConfig.outputDirectory}`);
-        logger.error("Use --force to overwrite or choose a different directory");
-        process.exit(1);
-      }
+    await errorHandler.wrapOperation(async () => {
+      try {
+        const stats = await fs.stat(scaffoldConfig.outputDirectory);
+        if (stats.isDirectory() && !scaffoldConfig.confirmOverwrite) {
+          throw new ScaffoldError(
+            ScaffoldErrorType.VALIDATION_ERROR,
+            `Directory already exists: ${scaffoldConfig.outputDirectory}\nUse --force to overwrite or choose a different directory`,
+            currentContext
+          );
+        }
 
-      if (scaffoldConfig.confirmOverwrite) {
-        logger.info("Removing existing directory...");
-        await fs.rm(scaffoldConfig.outputDirectory, { recursive: true, force: true });
+        if (scaffoldConfig.confirmOverwrite) {
+          logger.info("Removing existing directory...");
+          await fs.rm(scaffoldConfig.outputDirectory, { recursive: true, force: true });
+        }
+      } catch (error) {
+        if (error instanceof ScaffoldError) {
+          throw error;
+        }
+        // Directory doesn't exist, which is fine
       }
-    } catch {
-      // Directory doesn't exist, which is fine
-    }
+    }, currentContext);
 
     // Get template info
     const templateInfo = getTemplateInfo(scaffoldConfig.template);
     if (!templateInfo) {
-      logger.error(`Template not found: ${scaffoldConfig.template}`);
-      process.exit(1);
+      throw new ScaffoldError(
+        ScaffoldErrorType.TEMPLATE_ERROR,
+        `Template not found: ${scaffoldConfig.template}`,
+        currentContext
+      );
     }
 
     // Clone template
-    logger.info("Cloning template repository...");
-    await cloneTemplate(templateInfo.repository, scaffoldConfig.outputDirectory, {
-      branch: templateInfo.branch,
-      verbose: options.verbose,
+    currentContext = ErrorHandler.createContext("template-cloning", {
+      template: scaffoldConfig.template,
+      outputDirectory: scaffoldConfig.outputDirectory,
+      partiallyCreated: true,
     });
 
+    logger.info("Cloning template repository...");
+    await errorHandler.wrapOperation(
+      () =>
+        cloneTemplate(templateInfo.repository, scaffoldConfig.outputDirectory, {
+          branch: templateInfo.branch,
+          verbose: options.verbose,
+        }),
+      currentContext
+    );
+
     // Load template config
-    const templateConfig = await templateRegistry.loadTemplateConfig(scaffoldConfig.template);
+    currentContext = ErrorHandler.createContext("template-config-loading", {
+      template: scaffoldConfig.template,
+      outputDirectory: scaffoldConfig.outputDirectory,
+      partiallyCreated: true,
+    });
+
+    const templateConfig = await errorHandler.wrapOperation(
+      () => templateRegistry.loadTemplateConfig(scaffoldConfig.template),
+      currentContext
+    );
+
     if (!templateConfig) {
-      logger.error("Failed to load template configuration");
-      process.exit(1);
+      throw new ScaffoldError(
+        ScaffoldErrorType.TEMPLATE_ERROR,
+        "Failed to load template configuration - template may be invalid or missing scaffold.config.json",
+        currentContext
+      );
     }
 
     // Process template files
+    currentContext = ErrorHandler.createContext("template-processing", {
+      template: scaffoldConfig.template,
+      outputDirectory: scaffoldConfig.outputDirectory,
+      partiallyCreated: true,
+    });
+
     logger.info("Processing template files...");
-    await processTemplate(
-      scaffoldConfig.outputDirectory,
-      scaffoldConfig.outputDirectory,
-      scaffoldConfig,
-      templateConfig,
-      { verbose: options.verbose }
+    await errorHandler.wrapOperation(
+      () =>
+        processTemplate(
+          scaffoldConfig.outputDirectory,
+          scaffoldConfig.outputDirectory,
+          scaffoldConfig,
+          templateConfig,
+          { verbose: options.verbose }
+        ),
+      currentContext
     );
 
     // Initialize git repository
-    logger.info("Initializing git repository...");
-    await initializeRepository(scaffoldConfig.outputDirectory, {
-      authorName: scaffoldConfig.authorName,
-      authorEmail: scaffoldConfig.authorEmail,
-      verbose: options.verbose,
+    currentContext = ErrorHandler.createContext("git-initialization", {
+      template: scaffoldConfig.template,
+      outputDirectory: scaffoldConfig.outputDirectory,
+      partiallyCreated: true,
     });
 
+    logger.info("Initializing git repository...");
+    await errorHandler.wrapOperation(
+      () =>
+        initializeRepository(scaffoldConfig.outputDirectory, {
+          authorName: scaffoldConfig.authorName,
+          authorEmail: scaffoldConfig.authorEmail,
+          verbose: options.verbose,
+        }),
+      currentContext
+    );
+
     // Run post-processing
+    currentContext = ErrorHandler.createContext("post-processing", {
+      template: scaffoldConfig.template,
+      outputDirectory: scaffoldConfig.outputDirectory,
+      partiallyCreated: true,
+    });
+
     const postProcessingSteps =
       templateConfig.postProcessing ||
       (await getDefaultPostProcessingSteps(scaffoldConfig.outputDirectory));
-    await runPostProcessing(scaffoldConfig.outputDirectory, postProcessingSteps, {
-      verbose: options.verbose,
-    });
+
+    await errorHandler.wrapOperation(
+      () =>
+        runPostProcessing(scaffoldConfig.outputDirectory, postProcessingSteps, {
+          verbose: options.verbose,
+        }),
+      currentContext
+    );
 
     // Success!
     logger.info("");
@@ -183,8 +274,7 @@ export async function scaffoldCommand(options: ScaffoldOptions): Promise<void> {
     // Display smart next steps
     await displayNextSteps(scaffoldConfig, templateConfig, logger);
   } catch (error) {
-    logger.error("Failed to scaffold project", error);
-    process.exit(1);
+    await errorHandler.handleError(error as Error, currentContext);
   }
 }
 

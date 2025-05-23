@@ -121,7 +121,7 @@ describe("scaffold command", () => {
 
         await expect(scaffoldCommand(options)).rejects.toThrow("Process exit");
 
-        expect(mockLogger.info).toHaveBeenCalledWith("Scaffolding cancelled by user");
+        expect(mockLogger.info).toHaveBeenCalledWith("⚠️ Scaffolding cancelled by user");
         expect(mockExit).toHaveBeenCalledWith(0);
       });
     });
@@ -165,7 +165,7 @@ describe("scaffold command", () => {
 
         expect(mockLogger.info).toHaveBeenCalledWith("Running in interactive mode");
         expect(runInteractivePrompts).toHaveBeenCalled();
-        expect(mockLogger.info).toHaveBeenCalledWith("Scaffolding cancelled by user");
+        expect(mockLogger.info).toHaveBeenCalledWith("⚠️ Scaffolding cancelled by user");
         expect(mockExit).toHaveBeenCalledWith(0);
       });
 
@@ -189,7 +189,7 @@ describe("scaffold command", () => {
 
         expect(mockLogger.info).toHaveBeenCalledWith("Running in interactive mode");
         expect(runInteractivePrompts).toHaveBeenCalled();
-        expect(mockLogger.info).toHaveBeenCalledWith("Scaffolding cancelled by user");
+        expect(mockLogger.info).toHaveBeenCalledWith("⚠️ Scaffolding cancelled by user");
         expect(mockExit).toHaveBeenCalledWith(0);
       });
 
@@ -206,8 +206,8 @@ describe("scaffold command", () => {
 
         await expect(scaffoldCommand(options)).rejects.toThrow("Process exit");
 
-        expect(mockLogger.error).toHaveBeenCalledWith("Unknown template: unknown-template");
-        expect(mockLogger.info).toHaveBeenCalledWith("Available templates:");
+        expect(mockLogger.error).toHaveBeenCalledWith("Failed at stage: prompt-handling");
+        expect(mockLogger.error).toHaveBeenCalledWith("Error type: VALIDATION_ERROR");
         expect(mockExit).toHaveBeenCalledWith(1);
       });
     });
@@ -241,7 +241,8 @@ describe("scaffold command", () => {
 
       await expect(scaffoldCommand(options)).rejects.toThrow("Process exit");
 
-      expect(mockLogger.error).toHaveBeenCalledWith("Failed to scaffold project", mockError);
+      expect(mockLogger.error).toHaveBeenCalledWith("Failed at stage: initialization");
+      expect(mockLogger.error).toHaveBeenCalledWith("Error type: UNKNOWN_ERROR");
       expect(mockExit).toHaveBeenCalledWith(1);
     });
   });
