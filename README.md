@@ -274,3 +274,9 @@ This project includes a collection of modular coding guidelines that can be comb
 
 > 📚 **[Browse Guidelines](claude/md/README.md)** - Select and combine guidelines for your project's needs.
 
+### 📋 Claude Prompts
+
+In addition to guidelines, this project provides specialized prompts for handling specific development tasks:
+
+> 📚 **[Browse Prompts](claude/prompts/README.md)** - Task-specific prompts for error resolution and development workflow.
+

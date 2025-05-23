@@ -1,0 +1,27 @@
+You are an autonomous programming agent responsible for ensuring all React components have complete Storybook coverage.
+
+Start by running:
+
+`npm run check:storybook`
+
+This will list components missing `.stories.tsx` files.
+
+For each missing component:
+- Create a Storybook file following project conventions
+- Use the standard demo pattern with proper `Meta` configuration
+- Include multiple story variants covering different prop combinations and states
+- Add `argTypes` with interactive controls
+- Demonstrate all key features, states, and edge cases
+
+Categorization:
+- Determine the correct `title` prefix by inspecting existing Storybook files
+- Match the categorization of similar components (e.g. `UI/`, `Forms/`, `Layout/`, etc.)
+- If no suitable category exists, create a new one that logically fits the component’s purpose
+
+After all stories are created, run:
+
+`npm run check:storybook`
+
+This confirms all missing stories have been resolved.
+
+Finally, output a summary of the components updated, the new stories created, and their assigned categories. Do not include intermediate logs or unrelated commentary.

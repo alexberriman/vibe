@@ -6,7 +6,11 @@ dist/
 *.tsbuildinfo
 
 # IDE and editor files
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
 .idea/
 *.sw?
 .DS_Store
