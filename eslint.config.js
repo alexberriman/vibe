@@ -31,6 +31,9 @@ export default [
         __dirname: "readonly",
         __filename: "readonly",
         setTimeout: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
+        clearTimeout: "readonly",
 
         // Browser globals
         document: "readonly",
