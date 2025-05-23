@@ -10,7 +10,7 @@ Create an interactive CLI tool to scaffold new "vibe coding" projects from templ
 
 ### Core Functionality
 
-- [ ] Set up the command structure (`commands/scaffold/`)
+- [x] Set up the command structure (`commands/scaffold/`)
 - [ ] Implement basic CLI argument handling using Commander.js with options for non-interactive mode
 - [ ] Add interactive prompt library (prompts) for user input
 - [ ] Create template registry system for managing multiple project templates

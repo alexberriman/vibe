@@ -10,6 +10,7 @@ import { screenshotCommand } from "./commands/screenshot/index.js";
 import { designFeedbackCommand } from "./commands/design-feedback/index.js";
 import { tmuxCommand } from "./commands/tmux/index.js";
 import { openaiCommand } from "./commands/openai/index.js";
+import { createScaffoldCommand } from "./commands/scaffold/index.js";
 
 // Create the main CLI program
 const program = new Command();
@@ -31,6 +32,7 @@ program.addCommand(screenshotCommand());
 program.addCommand(designFeedbackCommand());
 program.addCommand(tmuxCommand());
 program.addCommand(openaiCommand());
+program.addCommand(createScaffoldCommand());
 
 // Parse arguments and execute the matching command
 program.parse(process.argv);
