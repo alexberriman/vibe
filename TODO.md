@@ -14,15 +14,15 @@ Create an interactive CLI tool to scaffold new "vibe coding" projects from templ
 - [x] Implement basic CLI argument handling using Commander.js with options for non-interactive mode
 - [x] Add interactive prompt library (prompts) for user input
 - [x] Create template registry system for managing multiple project templates
-- [ ] Extend existing progress-indicator.ts utility for git clone progress
-- [ ] Use pino logger for styled terminal output (already in dependencies)
+- [x] Extend existing progress-indicator.ts utility for git clone progress
+- [x] Use pino logger for styled terminal output (already in dependencies)
 
 ### Template Management
 
-- [ ] Design template configuration format (template.json or scaffold.config.json in each template repo)
-- [ ] Create template registry that maps template names to git repositories
-- [ ] Implement template metadata structure (name, description, prompts, placeholders)
-- [ ] Build template validation to ensure required files and structure exist
+- [x] Design template configuration format (template.json or scaffold.config.json in each template repo)
+- [x] Create template registry that maps template names to git repositories
+- [x] Implement template metadata structure (name, description, prompts, placeholders)
+- [x] Build template validation to ensure required files and structure exist
 - [ ] Add support for template-specific post-processing scripts
 - [ ] Create template caching mechanism to avoid re-cloning frequently used templates
 
