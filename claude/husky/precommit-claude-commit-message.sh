@@ -1,14 +1,11 @@
-#!/bin/bash
-# Block Claude mentions or AI tags in commit messages
+#!/bin/sh
 
-COMMIT_MSG_FILE="$(git rev-parse --git-path COMMIT_EDITMSG)"
+commit_msg_file=$1
+commit_msg=$(cat "$commit_msg_file")
 
-if [ -f "$COMMIT_MSG_FILE" ]; then
-  COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
-  if echo "$COMMIT_MSG" | grep -Ei "claude|Co-Authored-By:.*claude|Generated with \[Claude Code\]" >/dev/null; then
-    echo "🚫 Commit rejected: Please avoid mentioning Claude in commit messages."
-    echo "❌ Remove AI co-author tags or generated comments from commit messages."
-    echo "✅ Use messages that describe WHAT changed and WHY."
-    exit 1
-  fi
+if echo "$commit_msg" | grep -i "claude" >/dev/null; then
+  echo "🚫 Commit rejected: Please avoid mentioning Claude in commit messages."
+  echo "❌ Focus commit messages on WHAT changed and WHY, not HOW it was implemented."
+  echo "✅ Example: feat(products): add pagination to product endpoints"
+  exit 1
 fi
