@@ -3,6 +3,7 @@
 - One component per file (`kebab-case.tsx`)
 - Use named function declarations (`function MyComponent() {}`), not arrow functions
 - Create adjacent Storybook file: `component-name.stories.tsx`
+- Configure stories with `tags: ['test']` to enable Vitest testing
 - Name properties interface `ComponentNameProperties`
 - Destructure properties with defaults at the top
 - No tests required for UI/presentational components
@@ -29,3 +30,12 @@
 - Use stable keys for lists; avoid reindexing
 - Batch state updates
 - Virtualize long lists when needed
+
+### Storybook Testing
+
+- Add `@storybook/addon-vitest` for component testing
+- Tag testable stories with `tags: ['test']` in story metadata
+- Stories automatically become Vitest tests running in real browsers
+- Use play functions for interaction testing
+- Configure in `vitest.config.ts` with browser mode enabled
+- Run tests via Storybook UI or CLI (`npm run test-storybook`)
