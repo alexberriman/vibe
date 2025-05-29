@@ -2,18 +2,17 @@
 
 # attempt to detect claude in commit message
 
-# Try to grab the commit message from the staging context
-LAST_COMMIT_MSG=$(git config --get commit.template && cat "$(git config --get commit.template)" || true)
+# Only try to access commit message if GIT_INDEX_FILE exists
+# (avoids false reads from previous commits)
+GIT_DIR=$(git rev-parse --git-dir)
+COMMIT_EDITMSG="$GIT_DIR/COMMIT_EDITMSG"
 
-# If -m was used (staged for commit), fallback to checking index HEAD
-if [ -z "$LAST_COMMIT_MSG" ]; then
-  STUB_MSG=$(git log -1 --pretty=%B 2>/dev/null)
+if [ -f "$COMMIT_EDITMSG" ]; then
+  if grep -i "claude" "$COMMIT_EDITMSG" >/dev/null; then
+    echo "🚫 Pre-commit warning: Potential Claude mention detected in early commit message."
+    echo "🛑 Re-issue the commit without mentioning Claude."
+    exit 1
+  fi
 else
-  STUB_MSG="$LAST_COMMIT_MSG"
-fi
-
-if echo "$STUB_MSG" | grep -i "claude" >/dev/null; then
-  echo "🚫 Pre-commit warning: Potential Claude mention detected in early commit message."
-  echo "🛑 Re-issue the commit without mention claude."
-  exit 1
+  echo "ℹ️ Skipping early commit message check — no COMMIT_EDITMSG available yet."
 fi
